@@ -30,15 +30,11 @@ body{
    padding: 0;
    background-color: transparent;
    color: var(--custom-black);
-   transition: 0.1s;
+   transition: 0.3s all;
 }
 
 .custom-navbar button > i{
    font-size: 1.8em;
-}
-
-.custom-navbar button:hover{
-   transform: scale(1.1);
 }
 
 .navbar-menu-btn{}
@@ -53,6 +49,10 @@ body{
    justify-content: center;
 }
 
+.navbar-cart-btn:hover{
+   transform: scale(1.1);
+}
+
 .navbar-cart-badge{
    display: flex;
    justify-content: center;
@@ -64,16 +64,35 @@ body{
 
 .custom-main{
    width: 100%;
-   flex: 1 1;
+   height: 100%;
+   flex: 1;
    position: relative;
 }
 
 .section-filter{
-   width: 50%;
+   z-index: 1;
+   width: 100%;
    height: 100%;
    position: absolute;
-   left: -50%;
+   left: -100%;
+   background-color: white;
    transition: 0.3s all;
 }
 
 .section-cart{}
+
+.section-list{
+   z-index: 0;
+   width: 100%;
+   position: absolute;
+   height: 100%;
+}
+
+.section-list-filter{
+   width: 100%;
+   height: 100%;
+   position: absolute;
+   background-color: var(--custom-black);
+   opacity: 0%;
+   transition: 0.3s all;
+}
