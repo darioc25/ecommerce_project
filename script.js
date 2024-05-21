@@ -2,6 +2,9 @@
 
 const API_URL = "https://dummyjson.com/products?limit=0";
 
+const menuBtn = document.querySelector(".navbar-menu-btn");
+const sectionFilter = document.querySelector(".section-filter");
+
 const example = {
    id: 1,
    title: "iPhone 9",
@@ -30,3 +33,7 @@ const getProducts = async function() {
 };
 
 // getProducts();
+
+menuBtn.addEventListener("click", () => {
+   sectionFilter.style.left = "0%";
+});
