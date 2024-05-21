@@ -2,12 +2,6 @@
 
 const API_URL = "https://dummyjson.com/products?limit=0";
 
-const mdBreakPoint = 768;
-
-const menuBtn = document.querySelector(".navbar-menu-btn");
-const sectionFilter = document.querySelector(".section-filter");
-const sectionListFilter = document.querySelector(".section-list-filter");
-
 const example = {
    id: 1,
    title: "iPhone 9",
@@ -37,27 +31,50 @@ const getProducts = async function() {
 
 // getProducts();
 
-let menuBtnFlag = false;
+// Node elements
+const menuBtn = document.querySelector(".navbar-menu-btn");
+const cartBtn = document.querySelector(".navbar-cart-btn");
+const sectionFilter = document.querySelector(".section-filter");
+const sectionCart = document.querySelector(".section-cart");
+const sectionProductsMask = document.querySelector(".section-products-mask");
+
+let menuBtnClicked = false;
+let cartBtnClicked = false;
+
+// Menu button logic
 menuBtn.addEventListener("click", () => {
-   const position = sectionFilter.style.left;
-   const bodyWidth = document.body.clientWidth;
-   if(menuBtnFlag) {
-      menuBtn.style.transform = "rotate(0deg)";
-      menuBtnFlag = false;
-   } else {
-      menuBtn.style.transform = "rotate(90deg)";
-      menuBtnFlag = true;
-   };
-   if(!position || position !== "0%") {
-      sectionFilter.style.left = "0%";
-      sectionListFilter.style.opacity = "50%";
-   } else if(position && bodyWidth >= mdBreakPoint) {
-      sectionFilter.style.left = "-50%";
-      sectionListFilter.style.opacity = "0%";
-      sectionFilter.style.removeProperty("left");
-   } else if(position && bodyWidth < mdBreakPoint) {
-      sectionFilter.style.left = "-100%"
-      sectionListFilter.style.opacity = "0%";
-      sectionFilter.style.removeProperty("left");
+   if(cartBtnClicked) {
+      sectionCart.style.transform = "translateX(100%)";
+      cartBtnClicked = false;
    }
+
+   if(!menuBtnClicked) {
+      menuBtn.style.transform = "rotate(90deg)";
+      sectionProductsMask.classList.remove("d-none");
+      sectionFilter.style.transform = "translateX(0%)";
+      menuBtnClicked = true;
+   } else {
+      menuBtn.style.transform = "rotate(0deg)";
+      sectionProductsMask.classList.add("d-none");
+      sectionFilter.style.transform = "translateX(-100%)";
+      menuBtnClicked = false;
+   };
+});
+
+// Cart button logic
+cartBtn.addEventListener("click", () => {
+   if(menuBtnClicked) {
+      sectionFilter.style.transform = "translateX(-100%)";
+      menuBtnClicked = false;
+   };
+
+   if(!cartBtnClicked) {
+      sectionProductsMask.classList.remove("d-none");
+      sectionCart.style.transform = "translateX(0%)";
+      cartBtnClicked = true;
+   } else {
+      sectionProductsMask.classList.add("d-none");
+      sectionCart.style.transform = "translateX(100%)";
+      cartBtnClicked = false;
+   };
 });
