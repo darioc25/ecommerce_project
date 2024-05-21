@@ -1,0 +1,60 @@
+:root{
+   --custom-black: rgb(33, 37, 41);
+}
+
+*{
+   box-sizing: border-box;
+}
+
+body{
+   min-width: 360px !important;
+}
+
+.custom-header{
+   border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+   height: 80px;
+   display: flex;
+   align-items: center;
+}
+
+.custom-navbar{
+   width: 100%;
+   margin: 0 auto;
+}
+
+.custom-navbar button{
+   border: 0;
+   padding: 0;
+   background-color: transparent;
+   color: var(--custom-black);
+   transition: 0.1s;
+}
+
+.custom-navbar button > i{
+   font-size: 1.8em;
+}
+
+.custom-navbar button:hover{
+   transform: scale(1.1);
+}
+
+.navbar-menu-btn{}
+
+.navbar-logo{
+   background-color: var(--custom-black);
+}
+
+.navbar-cart-btn{
+   display: flex;
+   align-items: start;
+   justify-content: center;
+}
+
+.navbar-cart-badge{
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   border-radius: 50%;
+   aspect-ratio: 1/1;
+   font-size: 0.8em;
+}
