@@ -64,6 +64,7 @@ menuBtn.addEventListener("click", () => {
 // Cart button logic
 cartBtn.addEventListener("click", () => {
    if(menuBtnClicked) {
+      menuBtn.style.transform = "rotate(0deg)";
       sectionFilter.style.transform = "translateX(-100%)";
       menuBtnClicked = false;
    };
