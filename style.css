@@ -76,7 +76,7 @@ body{
    height: 100%;
    position: absolute;
    left: 0%;
-   /* transform: translateX(-100%); */
+   transform: translateX(-100%);
    background-color: white;
    transition: 0.3s all;
    overflow-y: scroll;
@@ -107,4 +107,19 @@ body{
    height: 100%;
    position: absolute;
    background: rgba(0, 0, 0, 0.3);
+}
+
+.filter-collapse-btn{
+   border: none;
+   background-color: transparent;
+   font-size: 1.3em;
+}
+
+.filter-form-btn > button{
+   border: none;
+   background-color: var(--custom-black);
+   color: white;
+   padding: 5px 30px;
+   font-weight: 600;
+   text-transform: uppercase;
 }

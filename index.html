@@ -37,77 +37,88 @@
          <section class="section-filter">
             <div class="container h-100">
                <div class="row h-100">
-                  <div class="col-12 d-flex flex-column justify-content-start align-items-center p-5">
+                  <div class="col-12 p-5">
 
-                     <!-- Extras Filter Section -->
-                     <div class="filter-extra d-flex flex-column bg-white w-100 mb-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                           <h3 class="m-0">Sort By</h3>
-                           <button class="btn"><i class="bi bi-caret-down"></i></button>
+                     <!-- Filter Section Form -->
+                     <form class="w-100 d-flex flex-column">
+
+                        <!-- Extras By Section -->
+                        <div class="filter-by d-flex flex-column w-100 mb-5">
+                           <div class="d-flex justify-content-between align-items-center">
+                              <h3 class="m-0">Sort By</h3>
+                              <button class="filter-collapse-btn" type="button" data-refer="filter-by-win"><i class="bi bi-caret-down"></i></button>
+                           </div>
+                           <hr>
+                           <div class="d-flex flex-column justify-content-center filter-by-win d-none">
+                              <h6>Price [$]</h6>
+                              <label><input type="radio" name="price-sort" value="min-max"> Min. to Max.</label>
+                              <label><input type="radio" name="price-sort" value="max-min"> Max. to Min.</label>
+                              <br>
+                              <h6>Alphabetical [A-Z]</h6>
+                              <label><input type="radio" name="alphabetical-sort" value="a-z"> From A to Z</label>
+                              <label><input type="radio" name="alphabetical-sort" value="z-a"> From Z to A</label>
+                              <br>
+                              <h6>Discount [%]</h6>
+                              <label><input type="radio" name="discount-sort" value="higher-lower"> Higher to Lower</label>
+                              <label><input type="radio" name="discount-sort" value="lower-higher"> Lower to Higher</label>
+                           </div>
                         </div>
-                        <hr>
-                        <h6>Price [$]</h6>
-                        <label><input type="radio" name="price-sort" value="min-max"> Min. to Max.</label>
-                        <label><input type="radio" name="price-sort" value="max-min"> Max. to Min.</label>
-                        <hr>
-                        <h6>Alphabetical [A-Z]</h6>
-                        <label><input type="radio" name="alphabetical-sort" value="a-z"> From A to Z</label>
-                        <label><input type="radio" name="alphabetical-sort" value="z-a"> From Z to A</label>
-                        <hr>
-                        <h6>Discount [%]</h6>
-                        <label><input type="radio" name="discount-sort" value="higher-lower"> Higher to Lower</label>
-                        <label><input type="radio" name="discount-sort" value="lower-higher"> Lower to Higher</label>
-                     </div>
 
-                     <!-- Prices Filter Section -->
-                     <div class="filter-price d-flex flex-column bg-white w-100 mb-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                           <h3 class="m-0">Price Range</h3>
-                           <button class="btn"><i class="bi bi-caret-down"></i></button>
+                        <!-- Prices Filter Section -->
+                        <div class="filter-prices d-flex flex-column w-100 mb-5">
+                           <div class="d-flex justify-content-between align-items-center">
+                              <h3 class="m-0">Price Range</h3>
+                              <button class="filter-collapse-btn" type="button" data-refer="filter-prices-win"><i class="bi bi-caret-down"></i></button>
+                           </div>
+                           <hr>
+                           <div class="filter-prices-win d-flex flex-column d-none">
+                              <label for="min-price">Min. Price</label>
+                              <input type="number" min="0" name="min-price">
+                              <label for="max-price">Max. Price</label>
+                              <input type="number" min="0" name="max-price">
+                           </div>
                         </div>
-                        <hr>
-                        <label for="min-price">Min. Price</label>
-                        <input type="number" min="0" name="min-price">
-                        <label for="max-price">Max. Price</label>
-                        <input type="number" min="0" name="max-price">
-                     </div>
 
-                     <!-- Categories Filter Section -->
-                     <div class="filter-categories-list bg-white w-100 mb-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                           <h3 class="m-0">Categories</h3>
-                           <button class="btn"><i class="bi bi-caret-down"></i></button>
+                        <!-- Categories Filter Section -->
+                        <div class="filter-categories w-100 mb-5">
+                           <div class="d-flex justify-content-between align-items-center">
+                              <h3 class="m-0">Categories</h3>
+                              <button class="filter-collapse-btn" type="button" data-refer="filter-categories-win"><i class="bi bi-caret-down"></i></button>
+                           </div>
+                           <hr>
+                           <div class="filter-categories-win d-none">
+                              <ul class="list-unstyled">
+                                 <li class="my-2 d-flex justify-content-between">
+                                    <label><input type="checkbox" name="category" value="all" checked> All</label>
+                                    <span class="category-quantity">(100)</span>
+                                 </li>
+                                 <li class="my-2 d-flex justify-content-between">
+                                    <label><input type="checkbox" name="category" value="electronics"> Electronics</label>
+                                    <span class="category-quantity">(23)</span>
+                                 </li>
+                                 <li class="my-2 d-flex justify-content-between">
+                                    <label><input type="checkbox" name="category" value="clothing"> Clothing</label>
+                                    <span class="category-quantity">(11)</span>
+                                 </li>
+                                 <li class="my-2 d-flex justify-content-between">
+                                    <label><input type="checkbox" name="category" value="car"> Car</label>
+                                    <span class="category-quantity">(9)</span>
+                                 </li>
+                                 <li class="my-2 d-flex justify-content-between">
+                                    <label><input type="checkbox" name="category" value="furniture"> Furniture</label>
+                                    <span class="category-quantity">(15)</span>
+                                 </li>
+                              </ul>
+                           </div>
                         </div>
-                        <hr>
-                        <ul class="list-unstyled">
-                           <li class="my-2 d-flex justify-content-between">
-                              <label><input type="checkbox" name="category" value="all" checked> All</label>
-                              <span class="category-quantity">(100)</span>
-                           </li>
-                           <li class="my-2 d-flex justify-content-between">
-                              <label><input type="checkbox" name="category" value="electronics"> Electronics</label>
-                              <span class="category-quantity">(23)</span>
-                           </li>
-                           <li class="my-2 d-flex justify-content-between">
-                              <label><input type="checkbox" name="category" value="clothing"> Clothing</label>
-                              <span class="category-quantity">(11)</span>
-                           </li>
-                           <li class="my-2 d-flex justify-content-between">
-                              <label><input type="checkbox" name="category" value="car"> Car</label>
-                              <span class="category-quantity">(9)</span>
-                           </li>
-                           <li class="my-2 d-flex justify-content-between">
-                              <label><input type="checkbox" name="category" value="furniture"> Furniture</label>
-                              <span class="category-quantity">(15)</span>
-                           </li>
-                        </ul>
-                     </div>
 
-                     <!-- Button Filter Section -->
-                     <div class="bg-white d-flex justify-content-evenly align-items-center w-100">
-                        <button class="btn btn-danger">Reset</button>
-                        <button class="btn btn-primary">Apply</button>
-                     </div>
+                        <!-- Button Filter Section -->
+                        <div class="filter-form-btn d-flex justify-content-evenly align-items-center w-100">
+                           <button class="filter-section-reset-btn" type="reset">Reset</button>
+                           <button class="filter-form-apply-btn" type="submit">Apply</button>
+                        </div>
+
+                     </form>
 
                   </div>
                </div>

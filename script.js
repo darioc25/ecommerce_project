@@ -79,3 +79,21 @@ cartBtn.addEventListener("click", () => {
       cartBtnClicked = false;
    };
 });
+
+// Fetching inputs data
+const submitBtn = document.querySelector(".filter-form-apply-btn");
+submitBtn.addEventListener("click", (e) => {
+   e.preventDefault();
+   const filterInputData = [...sectionFilter.querySelectorAll("input")].filter((entry) => {
+      return (entry.checked) || (entry.type === "number" && entry.value !== "");
+   });
+   filterInputData.forEach(entry => console.log(`${entry.name}: ${entry.value}`));
+});
+
+// Filter collapse buttons
+const filterCollapseBtn = document.querySelectorAll(".filter-collapse-btn");
+filterCollapseBtn.forEach(btn => {
+   btn.addEventListener("click", () => {
+      document.querySelector(`.${btn.dataset.refer}`).classList.toggle("d-none");
+   });
+});
