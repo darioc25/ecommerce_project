@@ -16,6 +16,8 @@
       <script src="script.js" defer></script>
    </head>
    <body>
+
+      <!-- Header Section -->
       <header class="custom-header container-fluid">
          <nav class="custom-navbar row">
             <div class="col-12 d-flex justify-content-between align-items-center">
@@ -27,22 +29,92 @@
             </div>
          </nav>
       </header>
+
+      <!-- Main Section -->
       <main class="custom-main">
+
+         <!-- Filter Section -->
          <section class="section-filter">
             <div class="container h-100">
                <div class="row h-100">
-                  <div class="col-12 d-flex justify-content-center align-items-center">
-                     <ul class="list-unstyled">
-                        <li>Option #1</li>
-                        <li>Option #2</li>
-                        <li>Option #3</li>
-                        <li>Option #4</li>
-                        <li>Option #5</li>
-                     </ul>
+                  <div class="col-12 d-flex flex-column justify-content-start align-items-center p-5">
+
+                     <!-- Extras Filter Section -->
+                     <div class="filter-extra d-flex flex-column bg-white w-100 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                           <h3 class="m-0">Sort By</h3>
+                           <button class="btn"><i class="bi bi-caret-down"></i></button>
+                        </div>
+                        <hr>
+                        <h6>Price [$]</h6>
+                        <label><input type="radio" name="price-sort" value="min-max"> Min. to Max.</label>
+                        <label><input type="radio" name="price-sort" value="max-min"> Max. to Min.</label>
+                        <hr>
+                        <h6>Alphabetical [A-Z]</h6>
+                        <label><input type="radio" name="alphabetical-sort" value="a-z"> From A to Z</label>
+                        <label><input type="radio" name="alphabetical-sort" value="z-a"> From Z to A</label>
+                        <hr>
+                        <h6>Discount [%]</h6>
+                        <label><input type="radio" name="discount-sort" value="higher-lower"> Higher to Lower</label>
+                        <label><input type="radio" name="discount-sort" value="lower-higher"> Lower to Higher</label>
+                     </div>
+
+                     <!-- Prices Filter Section -->
+                     <div class="filter-price d-flex flex-column bg-white w-100 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                           <h3 class="m-0">Price Range</h3>
+                           <button class="btn"><i class="bi bi-caret-down"></i></button>
+                        </div>
+                        <hr>
+                        <label for="min-price">Min. Price</label>
+                        <input type="number" min="0" name="min-price">
+                        <label for="max-price">Max. Price</label>
+                        <input type="number" min="0" name="max-price">
+                     </div>
+
+                     <!-- Categories Filter Section -->
+                     <div class="filter-categories-list bg-white w-100 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                           <h3 class="m-0">Categories</h3>
+                           <button class="btn"><i class="bi bi-caret-down"></i></button>
+                        </div>
+                        <hr>
+                        <ul class="list-unstyled">
+                           <li class="my-2 d-flex justify-content-between">
+                              <label><input type="checkbox" name="category" value="all" checked> All</label>
+                              <span class="category-quantity">(100)</span>
+                           </li>
+                           <li class="my-2 d-flex justify-content-between">
+                              <label><input type="checkbox" name="category" value="electronics"> Electronics</label>
+                              <span class="category-quantity">(23)</span>
+                           </li>
+                           <li class="my-2 d-flex justify-content-between">
+                              <label><input type="checkbox" name="category" value="clothing"> Clothing</label>
+                              <span class="category-quantity">(11)</span>
+                           </li>
+                           <li class="my-2 d-flex justify-content-between">
+                              <label><input type="checkbox" name="category" value="car"> Car</label>
+                              <span class="category-quantity">(9)</span>
+                           </li>
+                           <li class="my-2 d-flex justify-content-between">
+                              <label><input type="checkbox" name="category" value="furniture"> Furniture</label>
+                              <span class="category-quantity">(15)</span>
+                           </li>
+                        </ul>
+                     </div>
+
+                     <!-- Button Filter Section -->
+                     <div class="bg-white d-flex justify-content-evenly align-items-center w-100">
+                        <button class="btn btn-danger">Reset</button>
+                        <button class="btn btn-primary">Apply</button>
+                     </div>
+
                   </div>
                </div>
             </div>
          </section>
+
+         <!-- Cart Section -->
          <section class="section-cart">
             <div class="container h-100">
                <div class="row h-100">

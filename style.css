@@ -76,9 +76,10 @@ body{
    height: 100%;
    position: absolute;
    left: 0%;
-   transform: translateX(-100%);
+   /* transform: translateX(-100%); */
    background-color: white;
    transition: 0.3s all;
+   overflow-y: scroll;
 }
 
 .section-cart{
