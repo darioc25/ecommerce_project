@@ -31,31 +31,33 @@ const getProducts = async function() {
 
 const categoriesListEl = document.querySelector(".filter-categories-win-list");
 const getCategories = async function() {
-   const products = await getProducts();
-   const categories = new Map();
-   products.forEach(entry => {
-      if(!categories.has(entry.category)) {
-         categories.set(entry.category, 1);
-      } else {
-         categories.set(entry.category, categories.get(entry.category) + 1);
-      };
-   });
-   categories.entries().forEach(entry => {
-      const categoryStr = entry[0].split("-").length > 1 
-      ? `${entry[0].split("-")[0][0].toUpperCase() + entry[0].split("-")[0].slice(1)} ${entry[0].split("-")[1][0].toUpperCase() + entry[0].split("-")[1].slice(1)}`
-      : entry[0][0].toUpperCase() + entry[0].slice(1);
-
-      const categoryEl = `
-         <li class="my-2 d-flex justify-content-between">
-            <label><input type="checkbox" name="category" value="${entry[0]}"> ${categoryStr}</label>
-            <span class="category-quantity">(${entry[1]})</span>
-         </li>
-      `;
-      categoriesListEl.insertAdjacentHTML("beforeend", categoryEl);
-   });
+   try {
+      const products = await getProducts();
+      const categories = new Map();
+      products.forEach(entry => {
+         if(!categories.has(entry.category)) {
+            categories.set(entry.category, 1);
+         } else {
+            categories.set(entry.category, categories.get(entry.category) + 1);
+         };
+      });
+      categories.entries().forEach(entry => {
+         const categoryStr = entry[0].split("-").length > 1 
+         ? `${entry[0].split("-")[0][0].toUpperCase() + entry[0].split("-")[0].slice(1)} ${entry[0].split("-")[1][0].toUpperCase() + entry[0].split("-")[1].slice(1)}`
+         : entry[0][0].toUpperCase() + entry[0].slice(1);
+   
+         const categoryEl = `
+            <li class="my-2 d-flex justify-content-between">
+               <label><input type="checkbox" name="category" value="${entry[0]}"> ${categoryStr}</label>
+               <span class="category-quantity">(${entry[1]})</span>
+            </li>
+         `;
+         categoriesListEl.insertAdjacentHTML("beforeend", categoryEl);
+      });
+   } catch(error) {
+      console.error(error);
+   };
 };
-
-getCategories();
 
 // Node elements
 const menuBtn = document.querySelector(".navbar-menu-btn");
@@ -130,4 +132,8 @@ filterCollapseBtn.forEach(btn => {
       }
       document.querySelector(`.${btn.dataset.refer}`).classList.toggle("d-none");
    });
+});
+
+window.addEventListener("load", () => {
+   getCategories();
 });
