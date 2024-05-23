@@ -1,9 +1,11 @@
 :root{
+   --custom-font: "Roboto", sans-serif;
    --custom-black: rgb(33, 37, 41);
 }
 
 *{
    box-sizing: border-box;
+   font-family: var(--custom-font);
 }
 
 body{
@@ -72,6 +74,7 @@ body{
    overflow-x: hidden;
 }
 
+/* Section Filter */
 .section-filter{
    z-index: 2;
    width: 100%;
@@ -84,31 +87,12 @@ body{
    transition: transform 0.3s linear;
 }
 
-.section-cart{
-   z-index: 2;
-   width: 100%;
-   height: 100%;
-   position: absolute;
-   right: 0%;
-   transform: translateX(100%);
-   background-color: white;
-   transition: transform 0.3s linear;
+hr{
+   border-top: 1px solid rgba(0, 0, 0, 0.6);
 }
 
-.section-products{
-   z-index: 1;
-   width: 100%;
-   height: 100%;
-   position: absolute;
-   left: 0%;
-}
-
-.section-products-mask{
-   z-index: 2;
-   width: 100%;
-   height: 100%;
-   position: absolute;
-   background: rgba(0, 0, 0, 0.3);
+.section-filter h3{
+   font-weight: 400;
 }
 
 .filter-collapse-btn{
@@ -117,6 +101,7 @@ body{
    background-color: transparent;
    font-size: 1.3em;
    transition: transform 0.3s linear;
+   padding: 0px;
 }
 
 .filter-form-btn > button{
@@ -133,4 +118,43 @@ body{
    border: 1px solid var(--custom-black);
    background-color: white;
    color: var(--custom-black);
+}
+
+.section-filter input:not(input[type = number]):hover{
+   cursor: pointer;
+}
+
+.section-filter input[type = number]{
+   outline: none;
+   border: 1px solid rgba(0, 0, 0, 0.2);
+   padding: 5px 10px;
+}
+
+/* Section Cart */
+.section-cart{
+   z-index: 2;
+   width: 100%;
+   height: 100%;
+   position: absolute;
+   right: 0%;
+   transform: translateX(100%);
+   background-color: white;
+   transition: transform 0.3s linear;
+}
+
+/* Section Products */
+.section-products{
+   z-index: 1;
+   width: 100%;
+   height: 100%;
+   position: absolute;
+   left: 0%;
+}
+
+.section-products-mask{
+   z-index: 2;
+   width: 100%;
+   height: 100%;
+   position: absolute;
+   background: rgba(0, 0, 0, 0.3);
 }
