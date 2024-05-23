@@ -30,14 +30,15 @@ body{
    padding: 0;
    background-color: transparent;
    color: var(--custom-black);
-   transition: 0.3s all;
 }
 
 .custom-navbar button > i{
    font-size: 1.8em;
 }
 
-.navbar-menu-btn{}
+.navbar-menu-btn{
+   transition: transform 0.3s linear;
+}
 
 .navbar-logo{
    background-color: var(--custom-black);
@@ -47,6 +48,7 @@ body{
    display: flex;
    align-items: start;
    justify-content: center;
+   transition: transform 0.3s linear;
 }
 
 .navbar-cart-btn:hover{
@@ -78,8 +80,8 @@ body{
    left: 0%;
    transform: translateX(-100%);
    background-color: white;
-   transition: 0.3s all;
    overflow-y: scroll;
+   transition: transform 0.3s linear;
 }
 
 .section-cart{
@@ -90,7 +92,7 @@ body{
    right: 0%;
    transform: translateX(100%);
    background-color: white;
-   transition: 0.3s all;
+   transition: transform 0.3s linear;
 }
 
 .section-products{
@@ -111,15 +113,24 @@ body{
 
 .filter-collapse-btn{
    border: none;
+   color: var(--custom-black);
    background-color: transparent;
    font-size: 1.3em;
+   transition: transform 0.3s linear;
 }
 
 .filter-form-btn > button{
-   border: none;
+   border: 1px solid transparent;
    background-color: var(--custom-black);
    color: white;
    padding: 5px 30px;
    font-weight: 600;
    text-transform: uppercase;
+   transition: all 0.3s linear;
+}
+
+.filter-form-btn > button:hover{
+   border: 1px solid var(--custom-black);
+   background-color: white;
+   color: var(--custom-black);
 }
