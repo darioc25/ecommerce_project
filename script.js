@@ -135,6 +135,40 @@ filterCollapseBtn.forEach(btn => {
    });
 });
 
+// Populate Cart
+const sectionCartContainer = document.querySelector(".section-cart-container");
+for(let i = 0; i < 10; i++) {
+   const cartProductCard = `
+      <div class="col-12 d-flex justify-content-center align-items-center mb-3">
+         <div class="cart-product d-flex w-100">
+            <div class="cart-product-image-box d-flex justify-content-center align-items-center">
+               <img src="https://picsum.photos/100/10${i}" class="img-fluid">
+            </div>
+            <div class="d-flex flex-column w-100 ps-3">
+               <div class="cart-product-details-box d-flex justify-content-between">
+                  <h6>iPhone 12 Pro</h6>
+                  <h6>899.99$</h6>
+               </div>
+               <div class="cart-product-btn-box d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center">
+                     <label for="cart-product-quantity" class="me-1">Qt.</label>
+                     <select name="cart-product-quantity">
+                        <option value="1">1</option>
+                        <option value="1">2</option>
+                        <option value="1">3</option>
+                        <option value="1">4</option>
+                        <option value="1">5</option>
+                     </select>
+                  </div>
+                  <button class="p-0"><i class="bi bi-trash3"></i></button>
+               </div>
+            </div>
+         </div>
+      </div>
+   `;
+   sectionCartContainer.innerHTML += cartProductCard;
+};
+
 window.addEventListener("load", () => {
    getCategories();
 });
