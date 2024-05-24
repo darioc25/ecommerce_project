@@ -140,13 +140,27 @@ hr{
    right: 0%;
    transform: translateX(100%);
    background-color: white;
+   transition: all 0.3s linear;
+}
+
+.section-cart-title-box{
+   height: 10%;
+}
+
+.section-cart-container{
    overflow-y: scroll;
-   transition: transform 0.3s linear;
+   height: 80%;
+   border-top: 1px solid rgba(0, 0, 0, 0.2);
+   border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.section-cart-total-box{
+   height: 10%;
 }
 
 /* Cart Product Card */
 .cart-product{
-   border: 1px solid white;
+   border: 1px solid transparent;
    transition: 0.3s linear;
    padding: 5px;
 }

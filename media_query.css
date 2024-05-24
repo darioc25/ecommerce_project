@@ -5,8 +5,7 @@
    }
 
    .section-cart{
-      width: auto;
-      max-width: 50%;
+      width: 50%;
    }
 
    .cart-product-image-box{
@@ -17,14 +16,12 @@
 
 @media screen and (min-width: 992px) {
    .section-cart{
-      width: auto;
-      max-width: 40%;
+      width: 40%;
    }
 }
 
 @media screen and (min-width: 1400px) {
    .section-cart{
-      width: auto;
-      max-width: 30%;
+      width: 30%;
    }
 }

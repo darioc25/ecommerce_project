@@ -1,6 +1,6 @@
 'use strict';
 
-const API_URL = "https://dummyjson.com/products?limit=5";
+const API_URL = "https://dummyjson.com/products?limit=10";
 
 const getProducts = async function() {
    const res = await fetch(API_URL);
@@ -115,13 +115,54 @@ filterCollapseBtn.forEach(btn => {
    });
 });
 
+const genOpt = function() {
+   let optsEl = "";
+   for(let i = 0; i < 10; i++) {
+      optsEl += `<option value="${i + 1}">${i + 1}</option>`;
+   };
+   return optsEl;
+};
+
 // Populate Cart
-const sectionCartContainer = document.querySelector(".section-cart-container");
 const populateCart = function() {
+   sectionCart.innerHTML = "";
+   const items = 10;
+   // Logic for empty cart
+   if(items === 0) {
+      const emptyMsg = `
+         <div class="h-100 d-flex flex-column justify-content-center align-items-center">
+            <h1 class="display-3"><i class="bi bi-emoji-frown"></i></h1>
+            <h3 class="m-0 text-center">Your Cart is<br><span class="text-danger">Empty</span></h3>
+         </div>
+      `;
+      sectionCart.innerHTML += emptyMsg;
+      return;
+   };
+   // Logic for cart with items
+   const sectionCartContent = `
+      <div class="container-fluid h-100">
+         <div class="row h-100">
+            <!-- Cart Title -->
+            <div class="col-12 d-flex justify-content-between align-items-center section-cart-title-box">
+               <h4 class="m-0">Shopping Cart</h4>
+               <h6 class="m-0">${items} Items</h6>
+            </div>
+            <!-- Cart Products Container -->
+            <div class="section-cart-container col-12 d-flex flex-column pt-3"></div>
+            <div class="col-12 section-cart-total-box d-flex justify-content-between align-items-center">
+               <h3 class="m-0">Total</h3>
+               <h5 class="m-0"><span class="cart-total-products">0</span>$</h5>
+            </div>
+         </div>
+      </div>
+   `;
+   sectionCart.innerHTML = sectionCartContent;
+   const sectionCartContainer = document.querySelector(".section-cart-container");
+   const cartTotalProducts = document.querySelector(".cart-total-products");
    getProducts().then(products => {
-      for(let i = 0; i < 5; i++) {
+      for(let i = 0; i < 10; i++) {
          const cartProductCard = `
-            <div class="cart-product d-flex w-100 mb-3">
+            <div class="cart-product d-flex w-100 mb-3" data-id="${products[i].id}">
                <!-- Image Box -->
                <div class="cart-product-image-box d-flex justify-content-center align-items-center">
                   <img src="${products[i].thumbnail}" class="img-fluid">
@@ -136,13 +177,7 @@ const populateCart = function() {
                   <div class="cart-product-btn-box d-flex justify-content-between align-items-center">
                      <div class="d-flex align-items-center">
                         <label for="cart-product-quantity" class="me-1">Qt.</label>
-                        <select name="cart-product-quantity">
-                           <option value="1">1</option>
-                           <option value="1">2</option>
-                           <option value="1">3</option>
-                           <option value="1">4</option>
-                           <option value="1">5</option>
-                        </select>
+                        <select name="cart-product-quantity">${genOpt()}</select>
                      </div>
                      <button class="p-0"><i class="bi bi-trash3"></i></button>
                   </div>
@@ -150,12 +185,14 @@ const populateCart = function() {
             </div>
          `;
          sectionCartContainer.innerHTML += cartProductCard;
+         cartTotalProducts.innerHTML = (Number(cartTotalProducts.innerHTML) + products[i].price).toFixed(2);
       };
    });
 };
 
+// On window load event
 window.addEventListener("load", () => {
    // getCategories();
-   // populateCart();
-   console.log("Loaded...");
+   populateCart();
+   console.log("Content loaded...");
 });
