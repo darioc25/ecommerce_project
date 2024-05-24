@@ -1,26 +1,6 @@
 'use strict';
 
-const API_URL = "https://dummyjson.com/products?limit=0";
-
-const example = {
-   id: 1,
-   title: "iPhone 9",
-   description: "An apple mobile which is nothing like apple",
-   price: 549,
-   discountPercentage: 12.96,
-   rating: 4.69,
-   stock: 94,
-   brand: "Apple",
-   category: "smartphones",
-   thumbnail: "https://cdn.dummyjson.com/product-images/1/thumbnail.jpg",
-   images: [
-      "https://cdn.dummyjson.com/product-images/1/1.jpg",
-      "https://cdn.dummyjson.com/product-images/1/2.jpg",
-      "https://cdn.dummyjson.com/product-images/1/3.jpg",
-      "https://cdn.dummyjson.com/product-images/1/4.jpg",
-      "https://cdn.dummyjson.com/product-images/1/thumbnail.jpg"
-   ]
-};
+const API_URL = "https://dummyjson.com/products?limit=5";
 
 const getProducts = async function() {
    const res = await fetch(API_URL);
@@ -34,7 +14,7 @@ const getCategories = async function() {
    try {
       const products = await getProducts();
       const categories = new Map();
-
+      // Map creation with categories and amount of items for each
       products.forEach(entry => {
          if(!categories.has(entry.category)) {
             categories.set(entry.category, 1);
@@ -42,7 +22,7 @@ const getCategories = async function() {
             categories.set(entry.category, categories.get(entry.category) + 1);
          };
       });
-
+      // Creation of categories input for filter setting
       for(let [key, value] of categories) {
          const categoryStr = key.split("-").length > 1 
          ? `${key.split("-")[0][0].toUpperCase() + key.split("-")[0].slice(1)} ${key.split("-")[1][0].toUpperCase() + key.split("-")[1].slice(1)}`
@@ -137,38 +117,45 @@ filterCollapseBtn.forEach(btn => {
 
 // Populate Cart
 const sectionCartContainer = document.querySelector(".section-cart-container");
-for(let i = 0; i < 10; i++) {
-   const cartProductCard = `
-      <div class="col-12 d-flex justify-content-center align-items-center mb-3">
-         <div class="cart-product d-flex w-100">
-            <div class="cart-product-image-box d-flex justify-content-center align-items-center">
-               <img src="https://picsum.photos/100/10${i}" class="img-fluid">
-            </div>
-            <div class="d-flex flex-column w-100 ps-3">
-               <div class="cart-product-details-box d-flex justify-content-between">
-                  <h6>iPhone 12 Pro</h6>
-                  <h6>899.99$</h6>
+const populateCart = function() {
+   getProducts().then(products => {
+      for(let i = 0; i < 5; i++) {
+         const cartProductCard = `
+            <div class="cart-product d-flex w-100 mb-3">
+               <!-- Image Box -->
+               <div class="cart-product-image-box d-flex justify-content-center align-items-center">
+                  <img src="${products[i].thumbnail}" class="img-fluid">
                </div>
-               <div class="cart-product-btn-box d-flex justify-content-between align-items-center">
-                  <div class="d-flex align-items-center">
-                     <label for="cart-product-quantity" class="me-1">Qt.</label>
-                     <select name="cart-product-quantity">
-                        <option value="1">1</option>
-                        <option value="1">2</option>
-                        <option value="1">3</option>
-                        <option value="1">4</option>
-                        <option value="1">5</option>
-                     </select>
+               <div class="d-flex flex-column ps-2 flex-grow-1">
+                  <!-- Details Box -->
+                  <div class="cart-product-details-box d-flex justify-content-between">
+                     <h6 class="m-0 cart-product-details-title">${products[i].title.length > 15 ? products[i].title.substring(0, 15) + '<span class="opacity-75">...</span>' : products[i].title}</h6>
+                     <h6 class="m-0 cart-product-price">${products[i].price}$</h6>
                   </div>
-                  <button class="p-0"><i class="bi bi-trash3"></i></button>
+                  <!-- Buttons Box -->
+                  <div class="cart-product-btn-box d-flex justify-content-between align-items-center">
+                     <div class="d-flex align-items-center">
+                        <label for="cart-product-quantity" class="me-1">Qt.</label>
+                        <select name="cart-product-quantity">
+                           <option value="1">1</option>
+                           <option value="1">2</option>
+                           <option value="1">3</option>
+                           <option value="1">4</option>
+                           <option value="1">5</option>
+                        </select>
+                     </div>
+                     <button class="p-0"><i class="bi bi-trash3"></i></button>
+                  </div>
                </div>
             </div>
-         </div>
-      </div>
-   `;
-   sectionCartContainer.innerHTML += cartProductCard;
+         `;
+         sectionCartContainer.innerHTML += cartProductCard;
+      };
+   });
 };
 
 window.addEventListener("load", () => {
-   getCategories();
+   // getCategories();
+   // populateCart();
+   console.log("Loaded...");
 });

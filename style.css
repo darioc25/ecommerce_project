@@ -144,9 +144,35 @@ hr{
    transition: transform 0.3s linear;
 }
 
+/* Cart Product Card */
 .cart-product{
-   /* border: 1px solid rgba(0, 0, 0, 0.2); */
+   border: 1px solid white;
+   transition: 0.3s linear;
+   padding: 5px;
 }
+
+.cart-product:hover{
+   cursor: pointer;
+   border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.cart-product-image-box{
+   width: 80px;
+   height: 80px;
+}
+
+.cart-product-image-box > img{
+   background-color: rgba(127, 127, 127, 0.1);
+}
+
+.cart-product-details-box{}
+
+.cart-product-details-title{
+}
+
+.cart-product-details-price{}
+
+.cart-product-btn-box{}
 
 .cart-product-btn-box button{
    border: none;
