@@ -9,10 +9,12 @@ const cartBtn = document.querySelector(".navbar-cart-btn");
 const sectionFilter = document.querySelector(".section-filter");
 const sectionCart = document.querySelector(".section-cart");
 const sectionProductsMask = document.querySelector(".section-products-mask");
+const navbarCartBadge = document.querySelector(".navbar-cart-badge");
 
-// Global flags
+// Globals
 let cartBtnClicked = false;
 let menuBtnClicked = false;
+let cart;
 
 // Fetching from API and populating categories list
 const categoriesListEl = document.querySelector(".filter-categories-win-list");
@@ -35,10 +37,12 @@ const getCategories = async function() {
 
 // Menu button logic
 menuBtn.addEventListener("click", () => {
+   // Cart btn
    if(cartBtnClicked) {
       sectionCart.style.transform = "translateX(100%)";
       cartBtnClicked = false;
    };
+   // Menu btn
    if(!menuBtnClicked) {
       menuBtn.style.transform = "rotate(90deg)";
       sectionProductsMask.classList.remove("d-none");
@@ -52,7 +56,12 @@ menuBtn.addEventListener("click", () => {
    };
 });
 
-// Cart button logic
+// Product button placeholder
+document.querySelector(".fake-product").addEventListener("click", () => {
+   addToCart(Math.trunc(Math.random() * 100 + 1));
+});
+
+// Cart button
 cartBtn.addEventListener("click", () => {
    // Menu btn
    if(menuBtnClicked) {
@@ -60,6 +69,7 @@ cartBtn.addEventListener("click", () => {
       sectionFilter.style.transform = "translateX(-100%)";
       menuBtnClicked = false;
    };
+   // Cart btn animation
    if(!cartBtnClicked) {
       sectionProductsMask.classList.remove("d-none");
       sectionCart.style.transform = "translateX(0%)";
@@ -69,6 +79,8 @@ cartBtn.addEventListener("click", () => {
       sectionCart.style.transform = "translateX(100%)";
       cartBtnClicked = false;
    };
+   // Cart btn logic
+   populateCart();
 });
 
 // Filter collapse buttons logic
@@ -103,51 +115,26 @@ const genOpt = function(qt = 1) {
    for(let i = 0; i < 10; i++) {
       if(i + 1 === qt) {
          optsEl += `<option value="${i + 1}" selected>${i + 1}</option>`;
+         continue;
       };
       optsEl += `<option value="${i + 1}">${i + 1}</option>`;
    };
    return optsEl;
 };
 
-// Fake cart data
-const cart = [
-   {
-      "id": 36,
-      "title": "Protein Powder",
-      "price": 19.99,
-      "thumbnail": "https://cdn.dummyjson.com/products/images/groceries/Protein%20Powder/thumbnail.png"
-   },
-   {
-      "id": 37,
-      "title": "Red Onions",
-      "price": 1.99,
-      "thumbnail": "https://cdn.dummyjson.com/products/images/groceries/Red%20Onions/thumbnail.png"
-   },
-   {
-      "id": 38,
-      "title": "Rice",
-      "price": 5.99,
-      "thumbnail": "https://cdn.dummyjson.com/products/images/groceries/Rice/thumbnail.png"
-   },
-   {
-      "id": 39,
-      "title": "Soft Drinks",
-      "price": 1.99,
-      "thumbnail": "https://cdn.dummyjson.com/products/images/groceries/Soft%20Drinks/thumbnail.png"
-   },
-   {
-      "id": 40,
-      "title": "Strawberry",
-      "price": 3.99,
-      "thumbnail": "https://cdn.dummyjson.com/products/images/groceries/Strawberry/thumbnail.png"
-   },
-   {
-      "id": 41,
-      "title": "Tissue Paper Box",
-      "price": 2.49,
-      "thumbnail": "https://cdn.dummyjson.com/products/images/groceries/Tissue%20Paper%20Box/thumbnail.png"
-   }
-];
+// Adding products to cart [localStorage]
+const addToCart = async function(id) {
+   if(cart.some(entry => entry.id === id)) {
+      cart[cart.findIndex(entry => entry.id === id)].qt += 1;
+   } else {
+      const res = await fetch(`https://dummyjson.com/products/${id}?select=title,price,thumbnail`);
+      const entry = await res.json();
+      entry.qt = 1;
+      cart.push(entry);
+   };
+   localStorage.setItem("data", JSON.stringify(cart));
+   navbarCartBadge.innerHTML = cart.length;
+};
 
 // Populate Cart
 const populateCart = function() {
@@ -157,7 +144,7 @@ const populateCart = function() {
       sectionCart.innerHTML += `
          <div class="h-100 d-flex flex-column justify-content-center align-items-center">
             <h1 class="display-3"><i class="bi bi-emoji-frown"></i></h1>
-            <h3 class="m-0 text-center">Your Cart is<br><span class="text-danger">Empty</span></h3>
+            <h3 class="m-0 text-center">Your Cart is <span class="text-danger">Empty</span></h3>
          </div>
       `;
    } else {
@@ -168,7 +155,7 @@ const populateCart = function() {
                <!-- Cart Title -->
                <div class="col-12 d-flex justify-content-between align-items-center section-cart-title-box">
                   <h4 class="m-0">Shopping Cart</h4>
-                  <h6 class="m-0">${cart.length} Items</h6>
+                  <h6 class="m-0 text-secondary">${cart.length} Items</h6>
                </div>
                <!-- Cart Products Container -->
                <div class="section-cart-container col-12 d-flex flex-column pt-3"></div>
@@ -199,7 +186,7 @@ const populateCart = function() {
                   <div class="cart-product-btn-box d-flex justify-content-between align-items-center">
                      <div class="d-flex align-items-center">
                         <label for="cart-product-quantity" class="me-1">Qt.</label>
-                        <select name="cart-product-quantity">${genOpt(1)}</select>
+                        <select name="cart-product-quantity">${genOpt(cart.qt)}</select>
                      </div>
                      <button class="p-0"><i class="bi bi-trash3"></i></button>
                   </div>
@@ -214,7 +201,8 @@ const populateCart = function() {
 
 // Executing functions on window load event
 window.addEventListener("load", () => {
+   console.log("Load event triggered...");
    getCategories();
-   populateCart();
-   console.log("Content loaded...");
+   cart = JSON.parse(localStorage.getItem("data")) || new Array();
+   navbarCartBadge.innerHTML = cart.length;
 });
