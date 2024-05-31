@@ -204,7 +204,7 @@ const populateCart = function() {
                   <div class="cart-product-btn-box d-flex justify-content-between align-items-center">
                      <div class="d-flex align-items-center">
                         <label for="cart-product-quantity" class="me-1">Qt.</label>
-                        <select name="cart-product-quantity" class="cart-product-quantity">${genOpt(cart.qt)}</select>
+                        <select name="cart-product-quantity" class="cart-product-quantity">${genOpt(entry.qt)}</select>
                      </div>
                      <button class="p-0"><i class="bi bi-trash3 cart-trash-btn"></i></button>
                   </div>
@@ -216,7 +216,7 @@ const populateCart = function() {
    };
 };
 
-// Cart events listener
+// Cart event listener for delete product
 sectionCart.addEventListener("click", e => {
    if(e.target.classList.contains("cart-trash-btn")) {
       cart.splice(cart.findIndex(entry => entry.id === Number(e.target.closest(".cart-product").dataset.id)), 1);
@@ -234,8 +234,18 @@ sectionCart.addEventListener("click", e => {
             </div>
          `;
       };
-   } else if(e.target.classList.contains("cart-product-quantity")) {
-      // Logic for quantity
+   };
+});
+
+// Cart event listener for change quantity (two event listener to resolve a smartphone bug)
+sectionCart.addEventListener("change", e => {
+   const selectQt = Number(e.target.value);
+   const cartProduct = cart[cart.findIndex(entry => entry.id === Number(e.target.closest(".cart-product").dataset.id))];
+   if(selectQt !== cartProduct.qt) {
+      cartProduct.qt = selectQt;
+      localStorage.setItem("data", JSON.stringify(cart));
+      cartBadgeUpdate();
+      cartTotalAmountUpdate();
    };
 });
 
