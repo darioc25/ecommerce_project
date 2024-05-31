@@ -61,6 +61,23 @@ document.querySelector(".fake-product").addEventListener("click", () => {
    addToCart(Math.trunc(Math.random() * 100 + 1));
 });
 
+// Cart micro-function #1
+const navCartBadgeUpdate = () => {
+   navbarCartBadge.innerHTML = cart.length;
+};
+
+// Cart micro-function #2
+const cartBadgeUpdate = () => {
+   if(cart.length === 0) return;
+   document.querySelector(".cart-badge-items-quantity").innerHTML = cart.reduce((tot, entry) => tot += entry.qt, 0);
+};
+
+// Cart micro-function #3
+const cartTotalAmountUpdate = () => {
+   if(cart.length === 0) return;
+   document.querySelector(".cart-total-products").innerHTML = cart.reduce((tot, entry) => tot += entry.price * entry.qt, 0).toFixed(2);
+};
+
 // Cart button
 cartBtn.addEventListener("click", () => {
    // Menu btn
@@ -74,13 +91,15 @@ cartBtn.addEventListener("click", () => {
       sectionProductsMask.classList.remove("d-none");
       sectionCart.style.transform = "translateX(0%)";
       cartBtnClicked = true;
+      // Cart btn logic
+      populateCart();
+      cartBadgeUpdate();
+      cartTotalAmountUpdate();
    } else {
       sectionProductsMask.classList.add("d-none");
       sectionCart.style.transform = "translateX(100%)";
       cartBtnClicked = false;
    };
-   // Cart btn logic
-   populateCart();
 });
 
 // Filter collapse buttons logic
@@ -133,7 +152,7 @@ const addToCart = async function(id) {
       cart.push(entry);
    };
    localStorage.setItem("data", JSON.stringify(cart));
-   navbarCartBadge.innerHTML = cart.length;
+   navCartBadgeUpdate();
 };
 
 // Populate Cart
@@ -141,7 +160,7 @@ const populateCart = function() {
    sectionCart.innerHTML = "";
    if(cart.length === 0) {
       // Logic for empty cart
-      sectionCart.innerHTML += `
+      sectionCart.innerHTML = `
          <div class="h-100 d-flex flex-column justify-content-center align-items-center">
             <h1 class="display-3"><i class="bi bi-emoji-frown"></i></h1>
             <h3 class="m-0 text-center">Your Cart is <span class="text-danger">Empty</span></h3>
@@ -155,7 +174,7 @@ const populateCart = function() {
                <!-- Cart Title -->
                <div class="col-12 d-flex justify-content-between align-items-center section-cart-title-box">
                   <h4 class="m-0">Shopping Cart</h4>
-                  <h6 class="m-0 text-secondary">${cart.length} Items</h6>
+                  <h6 class="m-0 text-secondary"><span class="cart-badge-items-quantity"></span> Items</h6>
                </div>
                <!-- Cart Products Container -->
                <div class="section-cart-container col-12 d-flex flex-column pt-3"></div>
@@ -168,7 +187,6 @@ const populateCart = function() {
          </div>
       `;
       const sectionCartContainer = document.querySelector(".section-cart-container");
-      const cartTotalAmount = document.querySelector(".cart-total-products");
       cart.forEach(entry => {
          const cartProductCard = `
             <div class="cart-product d-flex w-100 mb-3" data-id="${entry.id}">
@@ -186,23 +204,45 @@ const populateCart = function() {
                   <div class="cart-product-btn-box d-flex justify-content-between align-items-center">
                      <div class="d-flex align-items-center">
                         <label for="cart-product-quantity" class="me-1">Qt.</label>
-                        <select name="cart-product-quantity">${genOpt(cart.qt)}</select>
+                        <select name="cart-product-quantity" class="cart-product-quantity">${genOpt(cart.qt)}</select>
                      </div>
-                     <button class="p-0"><i class="bi bi-trash3"></i></button>
+                     <button class="p-0"><i class="bi bi-trash3 cart-trash-btn"></i></button>
                   </div>
                </div>
             </div>
          `;
          sectionCartContainer.innerHTML += cartProductCard;
-         cartTotalAmount.innerHTML = (Number(cartTotalAmount.innerHTML) + entry.price).toFixed(2);
       });
    };
 };
+
+// Cart events listener
+sectionCart.addEventListener("click", e => {
+   if(e.target.classList.contains("cart-trash-btn")) {
+      cart.splice(cart.findIndex(entry => entry.id === Number(e.target.closest(".cart-product").dataset.id)), 1);
+      localStorage.setItem("data", JSON.stringify(cart));
+      e.target.closest(".cart-product").remove();
+      navCartBadgeUpdate();
+      cartBadgeUpdate();
+      cartTotalAmountUpdate();
+      // Logic for last item on cart
+      if(cart.length === 0) {
+         sectionCart.innerHTML = `
+            <div class="h-100 d-flex flex-column justify-content-center align-items-center">
+               <h1 class="display-3"><i class="bi bi-emoji-frown"></i></h1>
+               <h3 class="m-0 text-center">Your Cart is <span class="text-danger">Empty</span></h3>
+            </div>
+         `;
+      };
+   } else if(e.target.classList.contains("cart-product-quantity")) {
+      // Logic for quantity
+   };
+});
 
 // Executing functions on window load event
 window.addEventListener("load", () => {
    console.log("Load event triggered...");
    getCategories();
    cart = JSON.parse(localStorage.getItem("data")) || new Array();
-   navbarCartBadge.innerHTML = cart.length;
+   navCartBadgeUpdate();
 });
