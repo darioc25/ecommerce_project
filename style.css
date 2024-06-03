@@ -191,6 +191,7 @@ hr{
    position: absolute;
    background: rgba(0, 0, 0, 0.2);
    backdrop-filter: blur(10px);
+   -webkit-backdrop-filter: blur(10px);
 }
 
 .section-products{
@@ -223,10 +224,14 @@ hr{
    background-color: rgb(255, 60, 60);
    color: white;
    padding: 5px 10px;
-   font-size: 0.8em;
-   font-weight: 900;
+   font-size: 0.9em;
+   font-weight: 700;
    right: 10px;
    top: 10px;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   margin: 0px;
 }
 
 .product-card-imagebox{
@@ -246,16 +251,43 @@ hr{
 
 .product-card-textbox{
    padding: 10px 0;
+   display: flex;
+   flex-direction: column;
+   align-items: flex-start;
 }
 
 .product-card-textbox-sku{
    font-size: 0.8em;
    margin: 0px;
+   margin-bottom: 6px;
 }
 
 .product-card-textbox-title{
    font-size: 1.3em;
    margin: 0px;
+   margin-bottom: 3px;
+}
+
+.product-card-textbox-rating{
+   font-size: 1em;
+   margin: 0px;
+   margin-bottom: 12px;
+   background-color: rgba(127, 127, 127, 0.1);
+   padding: 2px 5px;
+   color:transparent;
+   overflow: hidden;
+   display: flex;
+}
+
+.product-card-textbox-rating-stars{
+   background-clip: text !important;
+   -webkit-text-fill-color: transparent !important;
+   -webkit-background-clip: text !important;
+   display: block;
+}
+
+.product-card-textbox-rating-value{
+   color: black;
 }
 
 .product-card-textbox-price{

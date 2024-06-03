@@ -256,19 +256,29 @@ sectionCart.addEventListener("change", e => {
 // Populate products list
 const populateProductsList = async function() {
    try {
-      const res = await fetch("https://dummyjson.com/products?limit=16&skip=50");
+      const res = await fetch("https://dummyjson.com/products?limit=4&skip=50");
       const {products} = await res.json();
       products.forEach(entry => {
          const productCard = `
             <div class="col-12 col-sm-6 col-lg-4 col-xl-3 py-2">
                <div data-id="${entry.id}" class="product-card">
-                  ${entry.discountPercentage >= 10 ? "<span class='product-card-discount-badge'>" + entry.discountPercentage.toFixed(1) + "%</span>" : ""}
+                  ${entry.discountPercentage >= 10 ? "<span class='product-card-discount-badge'>" + entry.discountPercentage.toFixed(1) + "% OFF</span>" : ""}
                   <div class="product-card-imagebox">
-                     <img src="${entry.images[0]}" class="">
+                     <img src="${entry.images[0]}">
                   </div>
                   <div class="product-card-textbox">
                      <h3 class="product-card-textbox-sku">SKU: ${entry.sku}</h3>
                      <h3 class="product-card-textbox-title">${entry.title.length > 20 ? entry.title.substring(0, 20) + '<span class="opacity-75">...</span>' : entry.title}</h3>
+                     <h3 class="product-card-textbox-rating">
+                        <span class="product-card-textbox-rating-stars" style="background: linear-gradient(90deg, orange ${((entry.rating * 100) / 5).toFixed()}%, white 0%)">
+                           <i class="bi bi-star-fill"></i>
+                           <i class="bi bi-star-fill"></i>
+                           <i class="bi bi-star-fill"></i>
+                           <i class="bi bi-star-fill"></i>
+                           <i class="bi bi-star-fill"></i>
+                        </span>
+                        <span class="product-card-textbox-rating-value ms-1">${entry.rating}</span>
+                     </h3>
                      <h3 class="product-card-textbox-price">${entry.discountPercentage >= 10 ? "<del>" + entry.price + "$</del> " + (entry.price * (1 - (entry.discountPercentage / 100))).toFixed(2) + "$" : entry.price + "$" }</h3>
                   </div>
                   <div class="product-card-buttonbox">
