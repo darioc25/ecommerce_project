@@ -8,6 +8,7 @@ const menuBtn = document.querySelector(".navbar-menu-btn");
 const cartBtn = document.querySelector(".navbar-cart-btn");
 const sectionFilter = document.querySelector(".section-filter");
 const sectionCart = document.querySelector(".section-cart");
+const sectionProductsContainer = document.querySelector(".section-products-container");
 const sectionProductsMask = document.querySelector(".section-products-mask");
 const navbarCartBadge = document.querySelector(".navbar-cart-badge");
 
@@ -57,8 +58,11 @@ menuBtn.addEventListener("click", () => {
 });
 
 // Product button placeholder
-document.querySelector(".fake-product").addEventListener("click", () => {
-   addToCart(Math.trunc(Math.random() * 100 + 1));
+document.querySelector(".section-products").addEventListener("click", e => {
+   if([...e.target.classList].includes("product-card-buttonbox-cart")) {
+      const productId = Number(e.target.closest(".product-card").dataset.id);
+      addToCart(productId);
+   };
 });
 
 // Cart micro-function #1
@@ -249,10 +253,42 @@ sectionCart.addEventListener("change", e => {
    };
 });
 
+// Populate products list
+const populateProductsList = async function() {
+   try {
+      const res = await fetch("https://dummyjson.com/products?limit=16&skip=50");
+      const {products} = await res.json();
+      products.forEach(entry => {
+         const productCard = `
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-3 py-2">
+               <div data-id="${entry.id}" class="product-card">
+                  ${entry.discountPercentage >= 10 ? "<span class='product-card-discount-badge'>" + entry.discountPercentage.toFixed(1) + "%</span>" : ""}
+                  <div class="product-card-imagebox">
+                     <img src="${entry.images[0]}" class="">
+                  </div>
+                  <div class="product-card-textbox">
+                     <h3 class="product-card-textbox-sku">SKU: ${entry.sku}</h3>
+                     <h3 class="product-card-textbox-title">${entry.title.length > 20 ? entry.title.substring(0, 20) + '<span class="opacity-75">...</span>' : entry.title}</h3>
+                     <h3 class="product-card-textbox-price">${entry.discountPercentage >= 10 ? "<del>" + entry.price + "$</del> " + (entry.price * (1 - (entry.discountPercentage / 100))).toFixed(2) + "$" : entry.price + "$" }</h3>
+                  </div>
+                  <div class="product-card-buttonbox">
+                     <button class="product-card-buttonbox-cart">ADD TO CART</button>
+                  </div>
+               </div>
+            </div>
+         `;
+         sectionProductsContainer.innerHTML += productCard;
+      });
+   } catch(error) {
+      console.error(error);
+   }
+};
+
 // Executing functions on window load event
 window.addEventListener("load", () => {
    console.log("Load event triggered...");
    getCategories();
    cart = JSON.parse(localStorage.getItem("data")) || new Array();
    navCartBadgeUpdate();
+   populateProductsList();
 });
