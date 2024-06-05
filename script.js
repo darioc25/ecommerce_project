@@ -11,11 +11,13 @@ const sectionCart = document.querySelector(".section-cart");
 const sectionProductsContainer = document.querySelector(".section-products-container");
 const sectionProductsMask = document.querySelector(".section-products-mask");
 const navbarCartBadge = document.querySelector(".navbar-cart-badge");
+const SectionProductsResultsValue = document.querySelector(".section-products-results-value");
 
 // Globals
 let cartBtnClicked = false;
 let menuBtnClicked = false;
 let cart;
+let products;
 
 // Fetching from API and populating categories list
 const categoriesListEl = document.querySelector(".filter-categories-win-list");
@@ -57,11 +59,12 @@ menuBtn.addEventListener("click", () => {
    };
 });
 
-// Product button placeholder
+// Add to cart btn
 document.querySelector(".section-products").addEventListener("click", e => {
    if([...e.target.classList].includes("product-card-buttonbox-cart")) {
       const productId = Number(e.target.closest(".product-card").dataset.id);
       addToCart(productId);
+      removeCartBtn(productId);
    };
 });
 
@@ -79,7 +82,36 @@ const cartBadgeUpdate = () => {
 // Cart micro-function #3
 const cartTotalAmountUpdate = () => {
    if(cart.length === 0) return;
-   document.querySelector(".cart-total-products").innerHTML = cart.reduce((tot, entry) => tot += entry.price * entry.qt, 0).toFixed(2);
+   document.querySelector(".cart-total-products").innerHTML = cart.reduce((tot, entry) => {
+      return tot += (entry.discountPercentage >= 10) ? ((entry.price * (1 - entry.discountPercentage / 100)) * entry.qt) : (entry.price * entry.qt);
+   }, 0).toFixed(2);
+};
+
+// Remove button "Add to Cart" function
+const removeCartBtn = function(id) {
+   if(cart.find(entry => entry.id === id)?.qt > 9) {
+      const btn = document.querySelector(`[data-id="${id}"]`).querySelector(".product-card-buttonbox-cart");
+      btn.classList.remove("product-card-buttonbox-cart");
+      btn.classList.add("product-card-buttonbox-cart-maxqt");
+      btn.setAttribute("disabled", "disabled");
+      btn.textContent = "MAX QUANTITY";
+   };
+};
+
+// Add button "Add to Cart" function
+const addCartBtn = function(id, bin = false) {
+   const btn = document.querySelector(`[data-id="${id}"]`).querySelector(".product-card-buttonbox-cart-maxqt");
+   if(cart.find(entry => entry.id === id).qt < 10 && !bin) {
+      btn.classList.remove("product-card-buttonbox-cart-maxqt");
+      btn.classList.add("product-card-buttonbox-cart");
+      btn.removeAttribute("disabled");
+      btn.textContent = "ADD TO CART";
+   } else if(bin && cart.find(entry => entry.id === id).qt === 10) {
+      btn.classList.remove("product-card-buttonbox-cart-maxqt");
+      btn.classList.add("product-card-buttonbox-cart");
+      btn.removeAttribute("disabled");
+      btn.textContent = "ADD TO CART";
+   };
 };
 
 // Cart button
@@ -146,14 +178,20 @@ const genOpt = function(qt = 1) {
 };
 
 // Adding products to cart [localStorage]
-const addToCart = async function(id) {
-   if(cart.some(entry => entry.id === id)) {
-      cart[cart.findIndex(entry => entry.id === id)].qt += 1;
-   } else {
-      const res = await fetch(`https://dummyjson.com/products/${id}?select=title,price,thumbnail`);
-      const entry = await res.json();
-      entry.qt = 1;
-      cart.push(entry);
+const addToCart = function(id) {
+   if(cart.find(entry => entry.id === id)?.qt < 10) {
+      cart.find(entry => entry.id === id).qt += 1;
+   } else if(!cart.find(entry => entry.id === id)) {
+      const product = products.find(entry => entry.id === id);
+      const cartProduct = {
+         id: product.id,
+         title: product.title,
+         price: product.price,
+         discountPercentage: product.discountPercentage,
+         qt: 1,
+         thumbnail: product.thumbnail
+      };
+      cart.push(cartProduct);
    };
    localStorage.setItem("data", JSON.stringify(cart));
    navCartBadgeUpdate();
@@ -202,7 +240,7 @@ const populateCart = function() {
                   <!-- Details Box -->
                   <div class="cart-product-details-box d-flex justify-content-between">
                      <h6 class="m-0 cart-product-details-title">${entry.title.length > 15 ? entry.title.substring(0, 15) + '<span class="opacity-75">...</span>' : entry.title}</h6>
-                     <h6 class="m-0 cart-product-price">${entry.price}$</h6>
+                     <h6 class="m-0 cart-product-price">${entry.discountPercentage >= 10 ? "<del>" + entry.price + "$</del> " + (entry.price * (1 - (entry.discountPercentage / 100))).toFixed(2) + "$" : entry.price + "$"}</h6>
                   </div>
                   <!-- Buttons Box -->
                   <div class="cart-product-btn-box d-flex justify-content-between align-items-center">
@@ -212,6 +250,8 @@ const populateCart = function() {
                      </div>
                      <button class="p-0"><i class="bi bi-trash3 cart-trash-btn"></i></button>
                   </div>
+                  <!-- Discount Badge -->
+                  ${entry.discountPercentage >= 10 ? "<span class='cart-product-discount'>" + entry.discountPercentage.toFixed() + "% OFF</span>" : ""}
                </div>
             </div>
          `;
@@ -223,9 +263,11 @@ const populateCart = function() {
 // Cart event listener for delete product
 sectionCart.addEventListener("click", e => {
    if(e.target.classList.contains("cart-trash-btn")) {
-      cart.splice(cart.findIndex(entry => entry.id === Number(e.target.closest(".cart-product").dataset.id)), 1);
+      const cartProduct = e.target.closest(".cart-product");
+      addCartBtn(Number(cartProduct.dataset.id), true);
+      cart.splice(cart.findIndex(entry => entry.id === Number(cartProduct.dataset.id)), 1);
       localStorage.setItem("data", JSON.stringify(cart));
-      e.target.closest(".cart-product").remove();
+      cartProduct.remove();
       navCartBadgeUpdate();
       cartBadgeUpdate();
       cartTotalAmountUpdate();
@@ -244,25 +286,29 @@ sectionCart.addEventListener("click", e => {
 // Cart event listener for change quantity (two event listener to resolve a smartphone bug)
 sectionCart.addEventListener("change", e => {
    const selectQt = Number(e.target.value);
-   const cartProduct = cart[cart.findIndex(entry => entry.id === Number(e.target.closest(".cart-product").dataset.id))];
+   const cartProduct = cart.find(entry => entry.id === Number(e.target.closest(".cart-product").dataset.id));
    if(selectQt !== cartProduct.qt) {
       cartProduct.qt = selectQt;
       localStorage.setItem("data", JSON.stringify(cart));
       cartBadgeUpdate();
       cartTotalAmountUpdate();
+      addCartBtn(cartProduct.id)
+      removeCartBtn(cartProduct.id);
    };
 });
 
 // Populate products list
 const populateProductsList = async function() {
    try {
-      const res = await fetch("https://dummyjson.com/products?limit=4&skip=50");
-      const {products} = await res.json();
+      const res = await fetch("https://dummyjson.com/products?limit=24&skip=50");
+      const {products: data} = await res.json();
+      products = data;
+      SectionProductsResultsValue.innerHTML = products.length;
       products.forEach(entry => {
          const productCard = `
             <div class="col-12 col-sm-6 col-lg-4 col-xl-3 py-2">
                <div data-id="${entry.id}" class="product-card">
-                  ${entry.discountPercentage >= 10 ? "<span class='product-card-discount-badge'>" + entry.discountPercentage.toFixed(1) + "% OFF</span>" : ""}
+                  ${entry.discountPercentage >= 10 ? "<span class='product-card-discount-badge'>" + entry.discountPercentage.toFixed() + "% OFF</span>" : ""}
                   <div class="product-card-imagebox">
                      <img src="${entry.images[0]}">
                   </div>
@@ -270,14 +316,14 @@ const populateProductsList = async function() {
                      <h3 class="product-card-textbox-sku">SKU: ${entry.sku}</h3>
                      <h3 class="product-card-textbox-title">${entry.title.length > 20 ? entry.title.substring(0, 20) + '<span class="opacity-75">...</span>' : entry.title}</h3>
                      <h3 class="product-card-textbox-rating">
-                        <span class="product-card-textbox-rating-stars" style="background: linear-gradient(90deg, orange ${((entry.rating * 100) / 5).toFixed()}%, white 0%)">
+                        <span class="product-card-textbox-rating-stars" style="background: linear-gradient(90deg, orange ${((entry.rating * 100) / 5).toFixed()}%, rgba(0, 0, 0, 0.15) 0%)">
                            <i class="bi bi-star-fill"></i>
                            <i class="bi bi-star-fill"></i>
                            <i class="bi bi-star-fill"></i>
                            <i class="bi bi-star-fill"></i>
                            <i class="bi bi-star-fill"></i>
                         </span>
-                        <span class="product-card-textbox-rating-value ms-1">${entry.rating}</span>
+                        <span class="product-card-textbox-rating-value ms-2">${entry.rating}</span>
                      </h3>
                      <h3 class="product-card-textbox-price">${entry.discountPercentage >= 10 ? "<del>" + entry.price + "$</del> " + (entry.price * (1 - (entry.discountPercentage / 100))).toFixed(2) + "$" : entry.price + "$" }</h3>
                   </div>
@@ -288,6 +334,7 @@ const populateProductsList = async function() {
             </div>
          `;
          sectionProductsContainer.innerHTML += productCard;
+         removeCartBtn(entry.id);
       });
    } catch(error) {
       console.error(error);
@@ -296,7 +343,6 @@ const populateProductsList = async function() {
 
 // Executing functions on window load event
 window.addEventListener("load", () => {
-   console.log("Load event triggered...");
    getCategories();
    cart = JSON.parse(localStorage.getItem("data")) || new Array();
    navCartBadgeUpdate();
