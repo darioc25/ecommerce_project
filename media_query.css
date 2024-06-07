@@ -7,11 +7,6 @@
    .section-cart{
       width: 50%;
    }
-
-   .cart-product-image-box{
-      width: 100px;
-      height: 100px;
-   }
 }
 
 @media screen and (min-width: 992px) {

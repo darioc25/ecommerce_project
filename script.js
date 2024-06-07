@@ -11,13 +11,14 @@ const sectionCart = document.querySelector(".section-cart");
 const sectionProductsContainer = document.querySelector(".section-products-container");
 const sectionProductsMask = document.querySelector(".section-products-mask");
 const navbarCartBadge = document.querySelector(".navbar-cart-badge");
-const SectionProductsResultsValue = document.querySelector(".section-products-results-value");
+const sectionProductsResultsValue = document.querySelector(".section-products-results-value");
+const sectionProductsSearchbarInput = document.querySelector(".section-products-searchbar-input");
 
 // Globals
 let cartBtnClicked = false;
 let menuBtnClicked = false;
 let cart;
-let products;
+// let products;
 
 // Fetching from API and populating categories list
 const categoriesListEl = document.querySelector(".filter-categories-win-list");
@@ -178,23 +179,21 @@ const genOpt = function(qt = 1) {
 };
 
 // Adding products to cart [localStorage]
-const addToCart = function(id) {
-   if(cart.find(entry => entry.id === id)?.qt < 10) {
-      cart.find(entry => entry.id === id).qt += 1;
-   } else if(!cart.find(entry => entry.id === id)) {
-      const product = products.find(entry => entry.id === id);
-      const cartProduct = {
-         id: product.id,
-         title: product.title,
-         price: product.price,
-         discountPercentage: product.discountPercentage,
-         qt: 1,
-         thumbnail: product.thumbnail
+const addToCart = async function(id) {
+   try{
+      if(cart.find(entry => entry.id === id)?.qt < 10) {
+         cart.find(entry => entry.id === id).qt += 1;
+      } else if(!cart.find(entry => entry.id === id)) {
+         const res = await fetch(`https://dummyjson.com/products/${id}?select=title,category,price,discountPercentage,thumbnail`);
+         const product = await res.json();
+         product.qt = 1;
+         cart.push(product);
       };
-      cart.push(cartProduct);
+      localStorage.setItem("data", JSON.stringify(cart));
+      navCartBadgeUpdate();
+   } catch(error) {
+      console.error(error);
    };
-   localStorage.setItem("data", JSON.stringify(cart));
-   navCartBadgeUpdate();
 };
 
 // Populate Cart
@@ -231,27 +230,22 @@ const populateCart = function() {
       const sectionCartContainer = document.querySelector(".section-cart-container");
       cart.forEach(entry => {
          const cartProductCard = `
-            <div class="cart-product d-flex w-100 mb-3" data-id="${entry.id}">
-               <!-- Image Box -->
-               <div class="cart-product-image-box d-flex justify-content-center align-items-center">
-                  <img src="${entry.thumbnail}" class="img-fluid">
+            <div class="cart-product mb-3" data-id="${entry.id}">
+               <div class="cart-product-image-box">
+                  <img src="${entry.thumbnail}">
+                  ${entry.discountPercentage >= 10 ? "<span class='cart-product-discount'>-" + entry.discountPercentage.toFixed() + "%</span>" : ""}
                </div>
-               <div class="d-flex flex-column ps-2 flex-grow-1">
-                  <!-- Details Box -->
-                  <div class="cart-product-details-box d-flex justify-content-between">
-                     <h6 class="m-0 cart-product-details-title">${entry.title.length > 15 ? entry.title.substring(0, 15) + '<span class="opacity-75">...</span>' : entry.title}</h6>
-                     <h6 class="m-0 cart-product-price">${entry.discountPercentage >= 10 ? "<del>" + entry.price + "$</del> " + (entry.price * (1 - (entry.discountPercentage / 100))).toFixed(2) + "$" : entry.price + "$"}</h6>
-                  </div>
-                  <!-- Buttons Box -->
-                  <div class="cart-product-btn-box d-flex justify-content-between align-items-center">
+               <div class="cart-product-box">
+                  <h6 class="cart-product-title">${entry.title}</h6>
+                  <h6 class="cart-product-category">${entry.category}</h6>
+                  ${entry.discountPercentage >= 10 ? `<h6 class="cart-product-price"><del class="cart-product-price-deleted me-1">${entry.price}$</del><span class="text-danger">${(entry.price * (1 - (entry.discountPercentage / 100))).toFixed(2)}$</span></h6>` : `<h6 class="cart-product-price">${entry.price}$</h6>`}
+                  <div class="cart-product-btn">
                      <div class="d-flex align-items-center">
                         <label for="cart-product-quantity" class="me-1">Qt.</label>
-                        <select name="cart-product-quantity" class="cart-product-quantity">${genOpt(entry.qt)}</select>
+                        <select name="cart-product-quantity" class="cart-product-btn-quantity">${genOpt(entry.qt)}</select>
                      </div>
-                     <button class="p-0"><i class="bi bi-trash3 cart-trash-btn"></i></button>
+                     <button class="cart-product-btn-delete"><i class="bi bi-x cart-trash-btn"></i></button>
                   </div>
-                  <!-- Discount Badge -->
-                  ${entry.discountPercentage >= 10 ? "<span class='cart-product-discount'>" + entry.discountPercentage.toFixed() + "% OFF</span>" : ""}
                </div>
             </div>
          `;
@@ -297,48 +291,74 @@ sectionCart.addEventListener("change", e => {
    };
 });
 
-// Populate products list
-const populateProductsList = async function() {
+// Get all products from API call
+const getProducts = async function() {
    try {
-      const res = await fetch("https://dummyjson.com/products?limit=24&skip=50");
-      const {products: data} = await res.json();
-      products = data;
-      SectionProductsResultsValue.innerHTML = products.length;
-      products.forEach(entry => {
-         const productCard = `
-            <div class="col-12 col-sm-6 col-lg-4 col-xl-3 py-2">
-               <div data-id="${entry.id}" class="product-card">
-                  ${entry.discountPercentage >= 10 ? "<span class='product-card-discount-badge'>" + entry.discountPercentage.toFixed() + "% OFF</span>" : ""}
-                  <div class="product-card-imagebox">
-                     <img src="${entry.images[0]}">
-                  </div>
-                  <div class="product-card-textbox">
-                     <h3 class="product-card-textbox-sku">SKU: ${entry.sku}</h3>
-                     <h3 class="product-card-textbox-title">${entry.title.length > 20 ? entry.title.substring(0, 20) + '<span class="opacity-75">...</span>' : entry.title}</h3>
-                     <h3 class="product-card-textbox-rating">
-                        <span class="product-card-textbox-rating-stars" style="background: linear-gradient(90deg, orange ${((entry.rating * 100) / 5).toFixed()}%, rgba(0, 0, 0, 0.15) 0%)">
-                           <i class="bi bi-star-fill"></i>
-                           <i class="bi bi-star-fill"></i>
-                           <i class="bi bi-star-fill"></i>
-                           <i class="bi bi-star-fill"></i>
-                           <i class="bi bi-star-fill"></i>
-                        </span>
-                        <span class="product-card-textbox-rating-value ms-2">${entry.rating}</span>
-                     </h3>
-                     <h3 class="product-card-textbox-price">${entry.discountPercentage >= 10 ? "<del>" + entry.price + "$</del> " + (entry.price * (1 - (entry.discountPercentage / 100))).toFixed(2) + "$" : entry.price + "$" }</h3>
-                  </div>
-                  <div class="product-card-buttonbox">
-                     <button class="product-card-buttonbox-cart">ADD TO CART</button>
-                  </div>
-               </div>
-            </div>
-         `;
-         sectionProductsContainer.innerHTML += productCard;
-         removeCartBtn(entry.id);
-      });
+      const res = await fetch("https://dummyjson.com/products?limit=12&skip=180");
+      const {products} = await res.json();
+      return products;
    } catch(error) {
       console.error(error);
-   }
+   };
+};
+
+// Populate products list
+const populateProductsList = function(arr) {
+   sectionProductsContainer.innerHTML = "";
+   arr.forEach(entry => {
+      const productCard = `
+         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 py-2">
+            <div data-id="${entry.id}" class="product-card">
+               ${entry.discountPercentage >= 10 ? `<span class="product-card-discount-badge">${entry.discountPercentage.toFixed()}% OFF</span>` : ""}
+               ${entry.stock === 0 ? '<span class="product-card-bell-badge"><i class="bi bi-bell-fill"></i></span>' : ""}
+               <div class="product-card-imagebox">
+                  <img src="${entry.images[0]}" class="img-fluid">
+               </div>
+               <div class="product-card-textbox">
+                  <h6 class="product-cart-textbox-sku">SKU: ${entry.sku}</h6>
+                  ${entry.stock > 10 ? '<h6 class="product-cart-textbox-stock-avaible">In Stock</h6>' : (entry.stock === 0 ? '<h6 class="product-cart-textbox-stock-out">Out of Stock</h6>' : '<h6 class="product-cart-textbox-stock-low">Low Stock</h6>')}
+                  <h3 class="product-card-textbox-title">${entry.title}</h3>
+                  <h3 class="product-card-textbox-rating">
+                     <span class="product-card-textbox-rating-stars" style="background: linear-gradient(90deg, orange ${((entry.rating * 100) / 5).toFixed()}%, rgba(0, 0, 0, 0.15) 0%)">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                     </span>
+                     <span class="product-card-textbox-rating-value ms-2">${entry.rating}</span>
+                  </h3>
+                  ${entry.discountPercentage >= 10 ? `<h3 class="product-card-textbox-price"><del class="product-card-textbox-price-deleted me-1">${entry.price}$</del>${(entry.price * (1 - (entry.discountPercentage / 100))).toFixed(2)}$</h3>` : `<h3 class="product-card-textbox-price">${entry.price}$</h3>`}
+               </div>
+               <div class="product-card-buttonbox">
+                  ${entry.stock === 0 ? '<button class="product-card-buttonbox-unavailable" disabled>SOLD OUT</button>' : '<button class="product-card-buttonbox-cart">ADD TO CART</button>'}
+               </div>
+            </div>
+         </div>
+      `;
+      sectionProductsContainer.innerHTML += productCard;
+      removeCartBtn(entry.id);
+   });
+};
+
+// Searchbar eventListener
+const searchFilter = async function() {
+   console.log("Getting all products...");
+   const products = await getProducts();
+   sectionProductsResultsValue.innerHTML = products.length;
+   populateProductsList(products);
+   sectionProductsSearchbarInput.addEventListener("input", () => {
+      const queryStr = sectionProductsSearchbarInput.value;
+      const resultProducts = products.filter(entry => entry.title.toLowerCase().includes(queryStr.toLowerCase())).map(entry => entry.id);
+      sectionProductsResultsValue.innerHTML = resultProducts.length;
+      const wasteProducts = products.filter(entry => !resultProducts.includes(entry.id)).map(entry => entry.id);
+      wasteProducts.forEach(entry => {
+         document.querySelector(`[data-id="${entry}"]`).closest(".col-12").classList.add("d-none");
+      });
+      resultProducts.forEach(entry => {
+         document.querySelector(`[data-id="${entry}"]`).closest(".col-12").classList.remove("d-none");
+      });
+   });
 };
 
 // Executing functions on window load event
@@ -346,5 +366,5 @@ window.addEventListener("load", () => {
    getCategories();
    cart = JSON.parse(localStorage.getItem("data")) || new Array();
    navCartBadgeUpdate();
-   populateProductsList();
+   searchFilter();
 });
