@@ -31,13 +31,13 @@
       <header class="custom-header container-fluid">
          <nav class="custom-navbar row">
             <div class="col-12 d-flex justify-content-between align-items-center">
-               <button class="navbar-menu-btn"><i class="bi bi-list"></i></button>
+               <button class="navbar-menu-btn"><i class="bi bi-list d-flex"></i></button>
                <div class="navbar-logo">
                   <img src="media/logo.svg">
                </div>
                <button class="navbar-cart-btn">
-                  <i class="bi bi-bag"></i>
-                  <span class="navbar-cart-badge badge text-bg-danger"></span>
+                  <i class="bi bi-bag-fill d-flex"></i>
+                  <span class="navbar-cart-badge"></span>
                </button>
             </div>
          </nav>
@@ -50,66 +50,76 @@
          <section class="section-filter">
             <div class="container h-100">
                <div class="row h-100">
-                  <div class="col-12 p-5">
+                  <div class="col-12 h-100">
 
                      <!-- Filter Section Form -->
-                     <form class="w-100 h-100 d-flex flex-column justify-content-between">
+                     <form class="h-100">
+
+                        <div class="filter-form-header">
+                           <div class="filter-form-input-alert d-none">
+                              <span class="me-1"><i class="bi bi-exclamation-circle-fill"></i></span>
+                              <span><strong>Error!</strong>&nbsp;<span class="filter-form-input-alert-text"><span></span>
+                           </div>
+                        </div>
 
                         <!-- Filter Settings Container -->
-                        <div>
+                        <div class="filter-form-input">
                            <!-- Extras By Section -->
-                           <div class="filter-by d-flex flex-column w-100">
-                              <div class="d-flex justify-content-between align-items-center">
+                           <div class="filter-by d-flex flex-column w-100 mb-4">
+                              <div class="d-flex justify-content-between align-items-center filter-form-title">
                                  <h3 class="m-0">SORT BY</h3>
-                                 <button class="filter-collapse-btn" type="button" data-refer="filter-by-win"><i class="bi bi-caret-down-fill"></i></button>
+                                 <button class="filter-collapse-btn" type="button" data-refer="filter-by-win"><i class="bi bi-caret-down-fill d-flex"></i></button>
                               </div>
-                              <hr>
-                              <div class="d-flex flex-column justify-content-center filter-by-win mb-5 d-none">
+                              <div class="d-flex flex-column justify-content-center filter-by-win p-3 pb-0 d-none">
                                  <h6>Price</h6>
-                                 <label><input type="radio" name="price-sort" value="min-max"><span class="ms-2">Min to Max</span></label>
-                                 <label><input type="radio" name="price-sort" value="max-min"><span class="ms-2">Max to Min</span></label>
+                                 <label><input type="radio" name="sort-by" value="min-max"><span class="ms-2">Min to Max</span></label>
+                                 <label><input type="radio" name="sort-by" value="max-min"><span class="ms-2">Max to Min</span></label>
                                  <br>
                                  <h6>Alphabetical</h6>
-                                 <label><input type="radio" name="alphabetical-sort" value="a-z"><span class="ms-2">From A to Z</span></label>
-                                 <label><input type="radio" name="alphabetical-sort" value="z-a"><span class="ms-2">From Z to A</span></label>
+                                 <label><input type="radio" name="sort-by" value="a-z"><span class="ms-2">From A to Z</span></label>
+                                 <label><input type="radio" name="sort-by" value="z-a"><span class="ms-2">From Z to A</span></label>
                                  <br>
                                  <h6>Discount</h6>
-                                 <label><input type="radio" name="discount-sort" value="higher-lower"><span class="ms-2">Higher to Lower</span></label>
-                                 <label><input type="radio" name="discount-sort" value="lower-higher"><span class="ms-2">Lower to Higher</span></label>
+                                 <label><input type="radio" name="sort-by" value="higher-lower"><span class="ms-2">Higher to Lower</span></label>
+                                 <label><input type="radio" name="sort-by" value="lower-higher"><span class="ms-2">Lower to Higher</span></label>
                               </div>
                            </div>
 
                            <!-- Prices Filter Section -->
-                           <div class="filter-prices d-flex flex-column w-100">
-                              <div class="d-flex justify-content-between align-items-center">
+                           <div class="filter-prices d-flex flex-column w-100 mb-4">
+                              <div class="d-flex justify-content-between align-items-center filter-form-title">
                                  <h3 class="m-0">PRICES RANGE</h3>
-                                 <button class="filter-collapse-btn" type="button" data-refer="filter-prices-win"><i class="bi bi-caret-down-fill"></i></button>
+                                 <button class="filter-collapse-btn" type="button" data-refer="filter-prices-win"><i class="bi bi-caret-down-fill d-flex"></i></button>
                               </div>
-                              <hr>
-                              <div class="filter-prices-win d-flex flex-column mb-5 d-none">
+                              <div class="filter-prices-win d-flex flex-column p-3 pb-0 d-none">
                                  <label for="min-price">Min. Price</label>
-                                 <input type="number" min="0" name="min-price">
+                                 <div class="filter-prices-win-box mb-2">
+                                    <input type="number" inputmode="numeric" min="0" name="min-price">
+                                    <span>$</span>
+                                 </div>
                                  <label for="max-price">Max. Price</label>
-                                 <input type="number" min="0" name="max-price">
+                                 <div class="filter-prices-win-box">
+                                    <input type="number" inputmode="numeric" min="0" name="max-price">
+                                    <span>$</span>
+                                 </div>
                               </div>
                            </div>
 
                            <!-- Categories Filter Section -->
                            <div class="filter-categories w-100">
-                              <div class="d-flex justify-content-between align-items-center">
+                              <div class="d-flex justify-content-between align-items-center filter-form-title">
                                  <h3 class="m-0">CATEGORIES</h3>
-                                 <button class="filter-collapse-btn" type="button" data-refer="filter-categories-win"><i class="bi bi-caret-down-fill"></i></button>
+                                 <button class="filter-collapse-btn" type="button" data-refer="filter-categories-win"><i class="bi bi-caret-down-fill d-flex"></i></button>
                               </div>
-                              <hr>
-                              <div class="filter-categories-win mb-5 d-none">
-                                 <ul class="list-unstyled filter-categories-win-list"></ul>
+                              <div class="filter-categories-win p-3 pb-0 d-none">
+                                 <ul class="list-unstyled filter-categories-win-list m-0"></ul>
                               </div>
                            </div>
-                     </div>
+                        </div>
 
                         <!-- Button Filter Section -->
                         <div class="filter-form-btn d-flex justify-content-evenly align-items-center w-100">
-                           <button class="filter-section-reset-btn" type="reset">Reset</button>
+                           <button class="filter-form-reset-btn" type="reset">Reset</button>
                            <button class="filter-form-apply-btn" type="submit">Apply</button>
                         </div>
 
@@ -126,11 +136,13 @@
             <div class="container">
                <div class="row">
                   <div class="col-12 pt-5">
-                     <div class="section-products-searchbar mb-5">
+                     <h1 class="section-products-title">Category / <span class="section-products-title-category text-capitalize">All</span></h1>
+                     <div class="section-products-searchbar">
                         <input type="text" class="section-products-searchbar-input" placeholder="Search a product...">
+                        <span><i class="bi bi-search"></i></span>
                      </div>
                      <div class="section-products-results">
-                        <h1><span class="section-products-results-value">0</span> results found</h1>
+                        <h3><span class="section-products-results-value">0</span> results found</h3>
                      </div>
                   </div>
                </div>

@@ -7,37 +7,23 @@ const API_URL = "https://dummyjson.com/products?limit=0";
 const menuBtn = document.querySelector(".navbar-menu-btn");
 const cartBtn = document.querySelector(".navbar-cart-btn");
 const sectionFilter = document.querySelector(".section-filter");
+const filterFormInputAlert = document.querySelector(".filter-form-input-alert");
+const filterFormInputAlertText = document.querySelector(".filter-form-input-alert-text");
+const categoriesListEl = document.querySelector(".filter-categories-win-list");
+const submitBtn = document.querySelector(".filter-form-apply-btn");
+const resetBtn = document.querySelector(".filter-form-reset-btn");
 const sectionCart = document.querySelector(".section-cart");
 const sectionProductsContainer = document.querySelector(".section-products-container");
 const sectionProductsMask = document.querySelector(".section-products-mask");
 const navbarCartBadge = document.querySelector(".navbar-cart-badge");
-const sectionProductsResultsValue = document.querySelector(".section-products-results-value");
+const sectionProductsTitleCategory= document.querySelector(".section-products-title-category");
 const sectionProductsSearchbarInput = document.querySelector(".section-products-searchbar-input");
+const sectionProductsResultsValue = document.querySelector(".section-products-results-value");
 
 // Globals
 let cartBtnClicked = false;
 let menuBtnClicked = false;
 let cart;
-// let products;
-
-// Fetching from API and populating categories list
-const categoriesListEl = document.querySelector(".filter-categories-win-list");
-const getCategories = async function() {
-   try {
-      const res = await fetch("https://dummyjson.com/products/categories");
-      const categories = await res.json();
-      categories.forEach(entry => {
-         const categoryEl = `
-            <li class="mb-2">
-               <label><input type="checkbox" name="category" value="${entry.slug}"><span class="ms-2">${entry.name}</span></label>
-            </li>
-         `;
-         categoriesListEl.insertAdjacentHTML("beforeend", categoryEl);
-      });
-   } catch(error) {
-      console.error(error);
-   };
-};
 
 // Menu button logic
 menuBtn.addEventListener("click", () => {
@@ -71,7 +57,13 @@ document.querySelector(".section-products").addEventListener("click", e => {
 
 // Cart micro-function #1
 const navCartBadgeUpdate = () => {
-   navbarCartBadge.innerHTML = cart.length;
+   if(cart.length > 0 && cart.length < 100) {
+      navbarCartBadge.innerHTML = cart.length;
+   } else if(cart.length >= 100) {
+      navbarCartBadge.innerHTML = "99+";
+   } else {
+      navbarCartBadge.innerHTML = "";
+   };
 };
 
 // Cart micro-function #2
@@ -155,16 +147,6 @@ filterCollapseBtn.forEach(btn => {
    });
 });
 
-// Getting all the active inputs data from filter settings
-const submitBtn = document.querySelector(".filter-form-apply-btn");
-submitBtn.addEventListener("click", (e) => {
-   e.preventDefault();
-   const filterInputsData = [...sectionFilter.querySelectorAll("input")].filter((entry) => {
-      return (entry.checked) || (entry.type === "number" && entry.value !== "");
-   });
-   filterInputsData.forEach(entry => console.log(`${entry.name}: ${entry.value}`));
-});
-
 // Generating option elements for cart products
 const genOpt = function(qt = 1) {
    let optsEl = "";
@@ -237,7 +219,7 @@ const populateCart = function() {
                </div>
                <div class="cart-product-box">
                   <h6 class="cart-product-title">${entry.title}</h6>
-                  <h6 class="cart-product-category">${entry.category}</h6>
+                  <h6 class="cart-product-category">${entry.category.replaceAll("-", " ")}</h6>
                   ${entry.discountPercentage >= 10 ? `<h6 class="cart-product-price"><del class="cart-product-price-deleted me-1">${entry.price}$</del><span class="text-danger">${(entry.price * (1 - (entry.discountPercentage / 100))).toFixed(2)}$</span></h6>` : `<h6 class="cart-product-price">${entry.price}$</h6>`}
                   <div class="cart-product-btn">
                      <div class="d-flex align-items-center">
@@ -291,17 +273,6 @@ sectionCart.addEventListener("change", e => {
    };
 });
 
-// Get all products from API call
-const getProducts = async function() {
-   try {
-      const res = await fetch("https://dummyjson.com/products?limit=12&skip=180");
-      const {products} = await res.json();
-      return products;
-   } catch(error) {
-      console.error(error);
-   };
-};
-
 // Populate products list
 const populateProductsList = function(arr) {
    sectionProductsContainer.innerHTML = "";
@@ -341,30 +312,184 @@ const populateProductsList = function(arr) {
    });
 };
 
+// Get all products from API call
+const getProducts = async function() {
+   try {
+      console.log("API call...");
+      const res = await fetch("https://dummyjson.com/products?limit=12");
+      const {products} = await res.json();
+      return products;
+   } catch(error) {
+      console.error(error);
+   };
+};
+
+// Populate categories list
+const getCategories = function(products) {
+      const categories = new Map();
+      products.forEach(entry => !categories.has(entry.category) ? categories.set(entry.category, 1) : categories.set(entry.category, categories.get(entry.category) + 1));
+      categoriesListEl.insertAdjacentHTML("beforeend", `
+         <li class="mb-2 d-flex justify-content-between">
+            <label><input type="radio" name="category" value="all" checked><span class="ms-2">All</span></label>
+            <span class="text-primary">[${[...categories].reduce((tot, entry) => tot += entry[1], 0)}]</span>
+         </li>
+      `);
+      [...categories].forEach(([str, value], id, arr) => {
+         const categoryStr = str.includes("-") ? str.replace("-", " ") : str;
+         const categoryEl = `
+            <li class="${id === arr.length - 1 ? "mb-0" : "mb-2"} d-flex justify-content-between">
+               <label><input type="radio" name="category" value="${str}"><span class="ms-2 text-capitalize">${categoryStr}</span></label>
+               <span class="text-primary">[${value}]</span>
+            </li>
+         `;
+         categoriesListEl.insertAdjacentHTML("beforeend", categoryEl);
+      });
+};
+
 // Searchbar eventListener
-const searchFilter = async function() {
-   console.log("Getting all products...");
-   const products = await getProducts();
-   sectionProductsResultsValue.innerHTML = products.length;
-   populateProductsList(products);
+const searchbarFilter = function(arr) {
    sectionProductsSearchbarInput.addEventListener("input", () => {
-      const queryStr = sectionProductsSearchbarInput.value;
-      const resultProducts = products.filter(entry => entry.title.toLowerCase().includes(queryStr.toLowerCase())).map(entry => entry.id);
+      const queryStr = sectionProductsSearchbarInput.value.toLowerCase().trim();
+      const resultProducts = arr.filter(entry => entry.title.toLowerCase().includes(queryStr));
       sectionProductsResultsValue.innerHTML = resultProducts.length;
-      const wasteProducts = products.filter(entry => !resultProducts.includes(entry.id)).map(entry => entry.id);
-      wasteProducts.forEach(entry => {
-         document.querySelector(`[data-id="${entry}"]`).closest(".col-12").classList.add("d-none");
-      });
-      resultProducts.forEach(entry => {
-         document.querySelector(`[data-id="${entry}"]`).closest(".col-12").classList.remove("d-none");
-      });
+      console.log(resultProducts);
    });
+};
+
+// Getting all the active inputs data from filter settings
+const filterSettings = function(arr) {
+   const minPriceEl = sectionFilter.querySelector("input[name='min-price']");
+   const maxPriceEl = sectionFilter.querySelector("input[name='max-price']");
+   const minProductPrice = Math.floor(Math.min(...arr.map(entry => entry.price)));
+   const maxProductPrice = Math.ceil(Math.max(...arr.map(entry => entry.price)));
+   minPriceEl.value = minProductPrice;
+   maxPriceEl.value = maxProductPrice;
+   // Submit btn
+   submitBtn.addEventListener("click", e => {
+      e.preventDefault();
+      filterFormInputAlert.classList.add("d-none");
+      const filterInputsData = [...sectionFilter.querySelectorAll("input")]
+      .filter(entry => (entry.checked) || (entry.type === "number" && entry.value !== ""))
+      .map(entry => [entry.name, entry.value]);
+      sectionProductsTitleCategory.innerHTML = filterInputsData.find(entry => entry[0] === "category")[1].replace("-", "");
+      let filteredArr = arr;
+      let priceRangeFlag = false;
+      if((minPriceEl.value && maxPriceEl.value) && (parseInt(minPriceEl.value) > parseInt(maxPriceEl.value))) {
+         filterFormInputAlert.classList.remove("d-none");
+         filterFormInputAlertText.innerHTML = "Min-Price greater than Max-Price."
+         priceRangeFlag = true;
+      } else if((minPriceEl.value && maxPriceEl.value) && (parseInt(minPriceEl.value) === parseInt(maxPriceEl.value))) {
+         filterFormInputAlert.classList.remove("d-none");
+         filterFormInputAlertText.innerHTML = "Min-Price equal to Max-Price."
+         priceRangeFlag = true;
+      };
+      filterInputsData.forEach(([input, value]) => {
+         switch(input) {
+            case "sort-by":
+               switch(value) {
+                  case "min-max":
+                     filteredArr = arr.sort((a, b) => a.price - b.price);
+                     break;
+                  case "max-min":
+                     filteredArr = arr.sort((a, b) => b.price - a.price);
+                     break;
+                  case "a-z":
+                     filteredArr = arr.sort((a, b) => {
+                        const charA = a.title.toLowerCase();
+                        const charB = b.title.toLowerCase();
+                        if(charA > charB) {
+                           return 1;
+                        } else if(charA < charB) {
+                           return -1;
+                        } else {
+                           return 0;
+                        };
+                     });
+                     break;
+                  case "z-a":
+                     filteredArr = arr.sort((a, b) => {
+                        const charA = a.title.toLowerCase();
+                        const charB = b.title.toLowerCase();
+                        if(charA > charB) {
+                           return -1;
+                        } else if(charA < charB) {
+                           return 1;
+                        } else {
+                           return 0;
+                        };
+                     });
+                     break;
+                  case "higher-lower":
+                     filteredArr = arr.filter(entry => entry.discountPercentage >= 10).sort((a, b) => b.discountPercentage - a.discountPercentage);
+                     break;
+                  case "lower-higher":
+                     filteredArr = arr.filter(entry => entry.discountPercentage >= 10).sort((a, b) => a.discountPercentage - b.discountPercentage);
+                     break;
+               };
+               console.log(`${input} -> ${value}`);
+               break;
+            case "min-price":
+               if(priceRangeFlag) break;
+               if(minPriceEl.value && !maxPriceEl.value) {
+                  filteredArr = filteredArr.filter(entry => entry.price >= parseInt(minPriceEl.value));
+               } else if(minPriceEl.value && maxPriceEl.value) {
+                  filteredArr = filteredArr.filter(entry => entry.price >= parseInt(minPriceEl.value) && entry.price <= parseInt(maxPriceEl.value));
+               };
+               console.log(input, parseInt(value));
+               break;
+            case "max-price":
+               if(priceRangeFlag) break;
+               if(!minPriceEl.value && maxPriceEl.value) {
+                  filteredArr = filteredArr.filter(entry => entry.price <= maxPriceEl.value);
+               };
+               console.log(input, parseInt(value));
+               break;
+            case "category":
+               if(value === "all") {
+                  console.log(`${input} -> ${value}`);
+                  break;
+               };
+               filteredArr = filteredArr.filter(entry => entry.category === value);
+               console.log(`${input} -> ${value}`);
+               break;
+         };
+      });
+      console.log(filteredArr);
+      // Populate products list
+      // populateProductsList(filteredArr);
+   });
+   // Reset btn
+   resetBtn.addEventListener("click", e => {
+      e.preventDefault();
+      const sortByActive = [...sectionFilter.querySelectorAll("input[name='sort-by']")].filter(entry => entry.checked)[0];
+      if(sortByActive) sortByActive.checked = false;
+      minPriceEl.value = minProductPrice;
+      maxPriceEl.value = maxProductPrice;
+      const categoryActive = [...sectionFilter.querySelectorAll("input[name='category']")].filter(entry => entry.checked);
+      if(categoryActive !== "all") {
+         categoryActive.checked = false;
+         sectionFilter.querySelector("input[value='all']").checked = true;
+      };
+      filterFormInputAlert.classList.add("d-none");
+   });
+};
+
+// Initialize the whole async part of the code
+const init = async function() {
+   // Fetching all products from API call
+   const res = await fetch("products.json");
+   const products = await res.json();
+   // Creating all the categories
+   getCategories(products);
+   // Searchbar init
+   searchbarFilter(products);
+   // Filter settings init
+   filterSettings(products);
 };
 
 // Executing functions on window load event
 window.addEventListener("load", () => {
-   getCategories();
    cart = JSON.parse(localStorage.getItem("data")) || new Array();
    navCartBadgeUpdate();
-   searchFilter();
+   init();
 });
