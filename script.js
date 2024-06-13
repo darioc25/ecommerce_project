@@ -3,12 +3,27 @@
 // API url
 const API_URL = "https://dummyjson.com/products?limit=0";
 
+// Own functions
+const ownFilter = function(array, callback) {
+   let validEntryID = 0;
+   for(let i = 0; i < array.length; i++) {
+      if(callback(array[i])) {
+         array[validEntryID] = array[i];
+         validEntryID++;
+      };
+   };
+   array.length = validEntryID;
+   return array;
+};
+
 // Node elements
 const menuBtn = document.querySelector(".navbar-menu-btn");
 const cartBtn = document.querySelector(".navbar-cart-btn");
 const sectionFilter = document.querySelector(".section-filter");
 const filterFormInputAlert = document.querySelector(".filter-form-input-alert");
 const filterFormInputAlertText = document.querySelector(".filter-form-input-alert-text");
+const minPriceEl = sectionFilter.querySelector("input[name='min-price']");
+const maxPriceEl = sectionFilter.querySelector("input[name='max-price']");
 const categoriesListEl = document.querySelector(".filter-categories-win-list");
 const submitBtn = document.querySelector(".filter-form-apply-btn");
 const resetBtn = document.querySelector(".filter-form-reset-btn");
@@ -315,7 +330,6 @@ const populateProductsList = function(arr) {
 // Get all products from API call
 const getProducts = async function() {
    try {
-      console.log("API call...");
       const res = await fetch("https://dummyjson.com/products?limit=12");
       const {products} = await res.json();
       return products;
@@ -347,32 +361,38 @@ const getCategories = function(products) {
 };
 
 // Searchbar eventListener
-const searchbarFilter = function(arr) {
+const searchbarFilter = function(obj) {
    sectionProductsSearchbarInput.addEventListener("input", () => {
+      let filteredArr = obj.filterArr.concat([]);
       const queryStr = sectionProductsSearchbarInput.value.toLowerCase().trim();
-      const resultProducts = arr.filter(entry => entry.title.toLowerCase().includes(queryStr));
-      sectionProductsResultsValue.innerHTML = resultProducts.length;
-      console.log(resultProducts);
+      ownFilter(filteredArr, entry => entry.title.toLowerCase().includes(queryStr));
+      // Update products result badge value
+      sectionProductsResultsValue.innerHTML = filteredArr.length;
+      obj.searchArr = filteredArr;
+      console.log(obj.searchArr);
+      // Populate products list
+      // populateProductsList(obj.filterArr);
    });
 };
 
 // Getting all the active inputs data from filter settings
-const filterSettings = function(arr) {
-   const minPriceEl = sectionFilter.querySelector("input[name='min-price']");
-   const maxPriceEl = sectionFilter.querySelector("input[name='max-price']");
-   const minProductPrice = Math.floor(Math.min(...arr.map(entry => entry.price)));
-   const maxProductPrice = Math.ceil(Math.max(...arr.map(entry => entry.price)));
-   minPriceEl.value = minProductPrice;
-   maxPriceEl.value = maxProductPrice;
-   // Submit btn
+const filterSettings = function(obj) {
+   // Set the min. and max. price in the inputs price range field
+   minPriceEl.value = Math.floor(Math.min(...obj.products.map(entry => entry.price)));
+   maxPriceEl.value = Math.ceil(Math.max(...obj.products.map(entry => entry.price)));
+   // Submit btn event listener
    submitBtn.addEventListener("click", e => {
       e.preventDefault();
       filterFormInputAlert.classList.add("d-none");
+      // Set the array equal to the other filter resulting array
+      let filteredArr = obj.products.concat([]);
+      // Fetch all the input fields coming from the form
       const filterInputsData = [...sectionFilter.querySelectorAll("input")]
-      .filter(entry => (entry.checked) || (entry.type === "number" && entry.value !== ""))
-      .map(entry => [entry.name, entry.value]);
-      sectionProductsTitleCategory.innerHTML = filterInputsData.find(entry => entry[0] === "category")[1].replace("-", "");
-      let filteredArr = arr;
+         .filter(entry => (entry.checked) || (entry.type === "number" && entry.value !== ""))
+         .map(entry => [entry.name, entry.value]);
+      // Change the category title in the main page with the actual selected categorty
+      sectionProductsTitleCategory.innerHTML = filterInputsData.find(entry => entry[0] === "category")[1].replace("-", " ");
+      // Checking for valid input price range
       let priceRangeFlag = false;
       if((minPriceEl.value && maxPriceEl.value) && (parseInt(minPriceEl.value) > parseInt(maxPriceEl.value))) {
          filterFormInputAlert.classList.remove("d-none");
@@ -383,18 +403,19 @@ const filterSettings = function(arr) {
          filterFormInputAlertText.innerHTML = "Min-Price equal to Max-Price."
          priceRangeFlag = true;
       };
+      // Loop over all the inputs
       filterInputsData.forEach(([input, value]) => {
          switch(input) {
             case "sort-by":
                switch(value) {
                   case "min-max":
-                     filteredArr = arr.sort((a, b) => a.price - b.price);
+                     filteredArr.sort((a, b) => a.price - b.price);
                      break;
                   case "max-min":
-                     filteredArr = arr.sort((a, b) => b.price - a.price);
+                     filteredArr.sort((a, b) => b.price - a.price);
                      break;
                   case "a-z":
-                     filteredArr = arr.sort((a, b) => {
+                     filteredArr.sort((a, b) => {
                         const charA = a.title.toLowerCase();
                         const charB = b.title.toLowerCase();
                         if(charA > charB) {
@@ -407,7 +428,7 @@ const filterSettings = function(arr) {
                      });
                      break;
                   case "z-a":
-                     filteredArr = arr.sort((a, b) => {
+                     filteredArr.sort((a, b) => {
                         const charA = a.title.toLowerCase();
                         const charB = b.title.toLowerCase();
                         if(charA > charB) {
@@ -420,71 +441,87 @@ const filterSettings = function(arr) {
                      });
                      break;
                   case "higher-lower":
-                     filteredArr = arr.filter(entry => entry.discountPercentage >= 10).sort((a, b) => b.discountPercentage - a.discountPercentage);
+                     ownFilter(filteredArr, entry => entry.discountPercentage >= 10).sort((a, b) => b.discountPercentage - a.discountPercentage);
                      break;
                   case "lower-higher":
-                     filteredArr = arr.filter(entry => entry.discountPercentage >= 10).sort((a, b) => a.discountPercentage - b.discountPercentage);
+                     ownFilter(filteredArr, entry => entry.discountPercentage >= 10).sort((a, b) => a.discountPercentage - b.discountPercentage);
                      break;
                };
-               console.log(`${input} -> ${value}`);
                break;
             case "min-price":
                if(priceRangeFlag) break;
                if(minPriceEl.value && !maxPriceEl.value) {
-                  filteredArr = filteredArr.filter(entry => entry.price >= parseInt(minPriceEl.value));
+                  ownFilter(filteredArr, entry => entry.price >= parseInt(minPriceEl.value));
                } else if(minPriceEl.value && maxPriceEl.value) {
-                  filteredArr = filteredArr.filter(entry => entry.price >= parseInt(minPriceEl.value) && entry.price <= parseInt(maxPriceEl.value));
+                  ownFilter(filteredArr, entry => entry.price >= parseInt(minPriceEl.value) && entry.price <= parseInt(maxPriceEl.value));
                };
-               console.log(input, parseInt(value));
                break;
             case "max-price":
                if(priceRangeFlag) break;
                if(!minPriceEl.value && maxPriceEl.value) {
-                  filteredArr = filteredArr.filter(entry => entry.price <= maxPriceEl.value);
+                  ownFilter(filteredArr, entry => entry.price <= maxPriceEl.value);
                };
-               console.log(input, parseInt(value));
                break;
             case "category":
-               if(value === "all") {
-                  console.log(`${input} -> ${value}`);
-                  break;
-               };
-               filteredArr = filteredArr.filter(entry => entry.category === value);
-               console.log(`${input} -> ${value}`);
+               if(value === "all") break;
+               ownFilter(filteredArr, entry => entry.category === value);
                break;
          };
       });
-      console.log(filteredArr);
+      sectionProductsResultsValue.innerHTML = filteredArr.length;
+      obj.filterArr = filteredArr;
+      console.log(obj.filterArr);
       // Populate products list
-      // populateProductsList(filteredArr);
+      // populateProductsList(obj.filterArr);
    });
    // Reset btn
    resetBtn.addEventListener("click", e => {
       e.preventDefault();
+      // Change the category title in the main page with the default value
+      sectionProductsTitleCategory.innerHTML = "All";
+      // Clear searchbar
+      sectionProductsSearchbarInput.value = "";
+      // Reset and clear all the active input fields
       const sortByActive = [...sectionFilter.querySelectorAll("input[name='sort-by']")].filter(entry => entry.checked)[0];
       if(sortByActive) sortByActive.checked = false;
-      minPriceEl.value = minProductPrice;
-      maxPriceEl.value = maxProductPrice;
+      minPriceEl.value = Math.floor(Math.min(...obj.products.map(entry => entry.price)));
+      maxPriceEl.value = Math.floor(Math.max(...obj.products.map(entry => entry.price)));
       const categoryActive = [...sectionFilter.querySelectorAll("input[name='category']")].filter(entry => entry.checked);
       if(categoryActive !== "all") {
          categoryActive.checked = false;
          sectionFilter.querySelector("input[value='all']").checked = true;
       };
+      // Remove alert banner
       filterFormInputAlert.classList.add("d-none");
+      // Update products result badge value
+      sectionProductsResultsValue.innerHTML = obj.products.length;
+      // Reset array filter
+      obj.filterArr = obj.products.concat([]);
+      console.log(obj.filterArr);
+      // Populate products list
+      // populateProductsList(obj.filterArr);
    });
 };
 
 // Initialize the whole async part of the code
 const init = async function() {
-   // Fetching all products from API call
+   // Fetching all products from an API call
    const res = await fetch("products.json");
-   const products = await res.json();
-   // Creating all the categories
-   getCategories(products);
+   const data = await res.json();
+   // Creating global variables to hold filtered products
+   const productsObj = {
+      products: data,
+      filterArr: data,
+      searchArr: data
+   };
+   // Init products result badge value
+   sectionProductsResultsValue.innerHTML = productsObj.products.length;
+   // Getting all categories
+   getCategories(productsObj.products);
    // Searchbar init
-   searchbarFilter(products);
-   // Filter settings init
-   filterSettings(products);
+   searchbarFilter(productsObj);
+   // Filter init
+   filterSettings(productsObj);
 };
 
 // Executing functions on window load event
