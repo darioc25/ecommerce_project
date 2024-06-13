@@ -61,15 +61,6 @@ menuBtn.addEventListener("click", () => {
    };
 });
 
-// Add to cart btn
-document.querySelector(".section-products").addEventListener("click", e => {
-   if([...e.target.classList].includes("product-card-buttonbox-cart")) {
-      const productId = Number(e.target.closest(".product-card").dataset.id);
-      addToCart(productId);
-      removeCartBtn(productId);
-   };
-});
-
 // Cart micro-function #1
 const navCartBadgeUpdate = () => {
    if(cart.length > 0 && cart.length < 100) {
@@ -95,30 +86,23 @@ const cartTotalAmountUpdate = () => {
    }, 0).toFixed(2);
 };
 
-// Remove button "Add to Cart" function
+// Set button "ADD TO CART" to "MAX QUANTITY"
 const removeCartBtn = function(id) {
    if(cart.find(entry => entry.id === id)?.qt > 9) {
-      const btn = document.querySelector(`[data-id="${id}"]`).querySelector(".product-card-buttonbox-cart");
-      btn.classList.remove("product-card-buttonbox-cart");
-      btn.classList.add("product-card-buttonbox-cart-maxqt");
-      btn.setAttribute("disabled", "disabled");
-      btn.textContent = "MAX QUANTITY";
+      const btnContainer = document.querySelector(`[data-id="${id}"]`).querySelector(".product-card-buttonbox");
+      if(btnContainer) btnContainer.innerHTML = '<button class="product-card-buttonbox-cart-maxqt" disabled>MAX QUANTITY</button>';
    };
 };
 
-// Add button "Add to Cart" function
+// Set button "MAX QUANTITY" to "ADD TO CART"
 const addCartBtn = function(id, bin = false) {
-   const btn = document.querySelector(`[data-id="${id}"]`).querySelector(".product-card-buttonbox-cart-maxqt");
-   if(cart.find(entry => entry.id === id).qt < 10 && !bin) {
-      btn.classList.remove("product-card-buttonbox-cart-maxqt");
-      btn.classList.add("product-card-buttonbox-cart");
-      btn.removeAttribute("disabled");
-      btn.textContent = "ADD TO CART";
-   } else if(bin && cart.find(entry => entry.id === id).qt === 10) {
-      btn.classList.remove("product-card-buttonbox-cart-maxqt");
-      btn.classList.add("product-card-buttonbox-cart");
-      btn.removeAttribute("disabled");
-      btn.textContent = "ADD TO CART";
+   const btnContainer = document.querySelector(`[data-id="${id}"]`).querySelector(".product-card-buttonbox");
+   if(btnContainer) {
+      if(cart.find(entry => entry.id === id).qt < 10 && !bin) {
+         btnContainer.innerHTML = '<button class="product-card-buttonbox-cart">ADD TO CART</button>';
+      } else if(bin && cart.find(entry => entry.id === id).qt === 10) {
+         btnContainer.innerHTML = '<button class="product-card-buttonbox-cart">ADD TO CART</button>';
+      };
    };
 };
 
@@ -173,24 +157,6 @@ const genOpt = function(qt = 1) {
       optsEl += `<option value="${i + 1}">${i + 1}</option>`;
    };
    return optsEl;
-};
-
-// Adding products to cart [localStorage]
-const addToCart = async function(id) {
-   try{
-      if(cart.find(entry => entry.id === id)?.qt < 10) {
-         cart.find(entry => entry.id === id).qt += 1;
-      } else if(!cart.find(entry => entry.id === id)) {
-         const res = await fetch(`https://dummyjson.com/products/${id}?select=title,category,price,discountPercentage,thumbnail`);
-         const product = await res.json();
-         product.qt = 1;
-         cart.push(product);
-      };
-      localStorage.setItem("data", JSON.stringify(cart));
-      navCartBadgeUpdate();
-   } catch(error) {
-      console.error(error);
-   };
 };
 
 // Populate Cart
@@ -317,7 +283,8 @@ const populateProductsList = function(arr) {
                   ${entry.discountPercentage >= 10 ? `<h3 class="product-card-textbox-price"><del class="product-card-textbox-price-deleted me-1">${entry.price}$</del>${(entry.price * (1 - (entry.discountPercentage / 100))).toFixed(2)}$</h3>` : `<h3 class="product-card-textbox-price">${entry.price}$</h3>`}
                </div>
                <div class="product-card-buttonbox">
-                  ${entry.stock === 0 ? '<button class="product-card-buttonbox-unavailable" disabled>SOLD OUT</button>' : '<button class="product-card-buttonbox-cart">ADD TO CART</button>'}
+                  ${entry.stock === 0 ? '<button class="product-card-buttonbox-unavailable" disabled>SOLD OUT</button>' : ""}
+                  ${(entry.stock > 0 && (!cart.find(element => element.id === entry.id) || cart.find(element => element.id === entry.id)?.qt < 10)) ? '<button class="product-card-buttonbox-cart">ADD TO CART</button>' : '<button class="product-card-buttonbox-cart-maxqt" disabled>MAX QUANTITY</button>'}
                </div>
             </div>
          </div>
@@ -472,7 +439,7 @@ const filterSettings = function(obj) {
       obj.filterArr = filteredArr;
       console.log(obj.filterArr);
       // Populate products list
-      // populateProductsList(obj.filterArr);
+      populateProductsList(obj.filterArr);
    });
    // Reset btn
    resetBtn.addEventListener("click", e => {
@@ -503,6 +470,38 @@ const filterSettings = function(obj) {
    });
 };
 
+// Adding products to cart [localStorage]
+const addToCart = function(obj) {
+   if(cart.find(entry => entry.id === obj.id)?.qt < 10) {
+      cart.find(entry => entry.id === obj.id).qt += 1;
+   } else if(!cart.find(entry => entry.id === obj.id)) {
+      obj.qt = 1;
+      cart.push(obj);
+   };
+   localStorage.setItem("data", JSON.stringify(cart));
+   navCartBadgeUpdate();
+};
+
+// Add to cart btn logic
+const addToCartListener = function(arr) {
+   document.querySelector(".section-products").addEventListener("click", e => {
+      if([...e.target.classList].includes("product-card-buttonbox-cart")) {
+         const productId = Number(e.target.closest(".product-card").dataset.id);
+         const product = arr.find(entry => entry.id === productId);
+         const cartProduct = {
+            id: product.id,
+            title: product.title,
+            category: product.category,
+            price: product.price,
+            discountPercentage: product.discountPercentage,
+            thumbnail: product.thumbnail
+         };
+         addToCart(cartProduct);
+         removeCartBtn(cartProduct);
+      };
+   });
+};
+
 // Initialize the whole async part of the code
 const init = async function() {
    // Fetching all products from an API call
@@ -522,6 +521,8 @@ const init = async function() {
    searchbarFilter(productsObj);
    // Filter init
    filterSettings(productsObj);
+   // Add to cart btn logic init
+   addToCartListener(productsObj.products);
 };
 
 // Executing functions on window load event
