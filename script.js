@@ -34,6 +34,8 @@ const navbarCartBadge = document.querySelector(".navbar-cart-badge");
 const sectionProductsTitleCategory= document.querySelector(".section-products-title-category");
 const sectionProductsSearchbarInput = document.querySelector(".section-products-searchbar-input");
 const sectionProductsResultsValue = document.querySelector(".section-products-results-value");
+const currentPageValue = document.querySelector(".current-page-value");
+const totalPageValue = document.querySelector(".total-page-value");
 
 // Globals
 let cartBtnClicked = false;
@@ -88,9 +90,9 @@ const cartTotalAmountUpdate = () => {
 
 // Set button "ADD TO CART" to "MAX QUANTITY"
 const removeCartBtn = function(id) {
-   if(cart.find(entry => entry.id === id)?.qt > 9) {
-      const btnContainer = document.querySelector(`[data-id="${id}"]`).querySelector(".product-card-buttonbox");
-      if(btnContainer) btnContainer.innerHTML = '<button class="product-card-buttonbox-cart-maxqt" disabled>MAX QUANTITY</button>';
+   const btnContainer = document.querySelector(`[data-id="${id}"]`).querySelector(".product-card-buttonbox");
+   if(btnContainer) {
+      if(cart.find(entry => entry.id === id)?.qt > 9) btnContainer.innerHTML = '<button class="product-card-buttonbox-cart-maxqt" disabled>MAX QUANTITY</button>';
    };
 };
 
@@ -283,23 +285,21 @@ const populateProductsList = function(arr) {
                   ${entry.discountPercentage >= 10 ? `<h3 class="product-card-textbox-price"><del class="product-card-textbox-price-deleted me-1">${entry.price}$</del>${(entry.price * (1 - (entry.discountPercentage / 100))).toFixed(2)}$</h3>` : `<h3 class="product-card-textbox-price">${entry.price}$</h3>`}
                </div>
                <div class="product-card-buttonbox">
-                  ${entry.stock === 0 ? '<button class="product-card-buttonbox-unavailable" disabled>SOLD OUT</button>' : ""}
-                  ${(entry.stock > 0 && (!cart.find(element => element.id === entry.id) || cart.find(element => element.id === entry.id)?.qt < 10)) ? '<button class="product-card-buttonbox-cart">ADD TO CART</button>' : '<button class="product-card-buttonbox-cart-maxqt" disabled>MAX QUANTITY</button>'}
+                  ${entry.stock === 0 ? '<button class="product-card-buttonbox-unavailable" disabled>SOLD OUT</button>' : (entry.stock > 0 && (!cart.find(element => element.id === entry.id) || cart.find(element => element.id === entry.id)?.qt < 10)) ? '<button class="product-card-buttonbox-cart">ADD TO CART</button>' : '<button class="product-card-buttonbox-cart-maxqt" disabled>MAX QUANTITY</button>'}
                </div>
             </div>
          </div>
       `;
       sectionProductsContainer.innerHTML += productCard;
-      removeCartBtn(entry.id);
    });
 };
 
-// Get all products from API call
+// Get all products from AJAX call
 const getProducts = async function() {
    try {
-      const res = await fetch("https://dummyjson.com/products?limit=12");
-      const {products} = await res.json();
-      return products;
+      const res = await fetch("products.json");
+      const data = await res.json();
+      return data;
    } catch(error) {
       console.error(error);
    };
@@ -328,7 +328,7 @@ const getCategories = function(products) {
 };
 
 // Searchbar eventListener
-const searchbarFilter = function(obj) {
+const searchbarFilter = function(obj, objPage) {
    sectionProductsSearchbarInput.addEventListener("input", () => {
       let filteredArr = obj.filterArr.concat([]);
       const queryStr = sectionProductsSearchbarInput.value.toLowerCase().trim();
@@ -336,14 +336,20 @@ const searchbarFilter = function(obj) {
       // Update products result badge value
       sectionProductsResultsValue.innerHTML = filteredArr.length;
       obj.searchArr = filteredArr;
-      console.log(obj.searchArr);
+      // Set pagination
+      objPage.pageNum = Math.ceil(obj.searchArr.length / 12);
+      objPage.currPage = 0;
+      objPage.s = 0;
+      obj.searchArr.length >= 12 ? (objPage.e = 11) : (objPage.e = obj.searchArr.length - 1);
+      currentPageValue.innerHTML = objPage.currPage + 1;
+      totalPageValue.innerHTML = objPage.pageNum;
       // Populate products list
-      // populateProductsList(obj.filterArr);
+      populateProductsList(obj.searchArr.slice(objPage.s, objPage.e + 1));
    });
 };
 
 // Getting all the active inputs data from filter settings
-const filterSettings = function(obj) {
+const filterSettings = function(obj, objPage) {
    // Set the min. and max. price in the inputs price range field
    minPriceEl.value = Math.floor(Math.min(...obj.products.map(entry => entry.price)));
    maxPriceEl.value = Math.ceil(Math.max(...obj.products.map(entry => entry.price)));
@@ -437,9 +443,16 @@ const filterSettings = function(obj) {
       });
       sectionProductsResultsValue.innerHTML = filteredArr.length;
       obj.filterArr = filteredArr;
-      console.log(obj.filterArr);
+      obj.searchArr = obj.filterArr;
+      // Set pagination
+      objPage.pageNum = Math.ceil(obj.filterArr.length / 12);
+      objPage.currPage = 0;
+      objPage.s = 0;
+      obj.filterArr.length >= 12 ? (objPage.e = 11) : (objPage.e = obj.filterArr.length - 1);
+      currentPageValue.innerHTML = objPage.currPage + 1;
+      totalPageValue.innerHTML = objPage.pageNum;
       // Populate products list
-      populateProductsList(obj.filterArr);
+      populateProductsList(obj.filterArr.slice(objPage.s, objPage.e + 1));
    });
    // Reset btn
    resetBtn.addEventListener("click", e => {
@@ -464,9 +477,16 @@ const filterSettings = function(obj) {
       sectionProductsResultsValue.innerHTML = obj.products.length;
       // Reset array filter
       obj.filterArr = obj.products.concat([]);
-      console.log(obj.filterArr);
+      obj.searchArr = obj.filterArr;
+      // Reset pagination
+      objPage.pageNum = Math.ceil(obj.filterArr.length / 12);
+      objPage.currPage = 0;
+      objPage.s = 0;
+      obj.filterArr.length >= 12 ? (objPage.e = 11) : (objPage.e = obj.filterArr.length - 1);
+      currentPageValue.innerHTML = objPage.currPage + 1;
+      totalPageValue.innerHTML = objPage.pageNum;
       // Populate products list
-      // populateProductsList(obj.filterArr);
+      populateProductsList(obj.products.slice(objPage.s, objPage.e + 1));
    });
 };
 
@@ -497,32 +517,78 @@ const addToCartListener = function(arr) {
             thumbnail: product.thumbnail
          };
          addToCart(cartProduct);
-         removeCartBtn(cartProduct);
+         removeCartBtn(cartProduct.id);
+      };
+   });
+};
+
+const pagination = function(objProduct, objPage) {
+   const prevPage = document.querySelector(".section-products-pagination-btn-prev");
+   const nextPage = document.querySelector(".section-products-pagination-btn-next");
+   currentPageValue.innerHTML = objPage.currPage + 1;
+   totalPageValue.innerHTML = objPage.pageNum;
+   // Prev page btn
+   prevPage.addEventListener("click", () => {
+      if(objPage.currPage > 0) {
+         objPage.currPage--;
+         if(objProduct.searchArr.slice(objPage.s).length >= 12) {
+            objPage.e -= 12;
+         } else {
+            objPage.e -= objProduct.searchArr.slice(objPage.s).length;
+         };
+         objPage.s -= 12;
+         currentPageValue.innerHTML = objPage.currPage + 1;
+         populateProductsList(objProduct.searchArr.slice(objPage.s, objPage.e + 1));
+         document.querySelector(".section-products").scrollTo({top: 0});
+      };
+   });
+   // Next page btn
+   nextPage.addEventListener("click", () => {
+      if(objPage.currPage < objPage.pageNum - 1) {
+         objPage.currPage++;
+         objPage.s += 12;
+         if(objProduct.searchArr.slice(objPage.s).length >= 12) {
+            objPage.e += 12;
+         } else {
+            objPage.e += objProduct.searchArr.slice(objPage.s).length;
+         };
+         currentPageValue.innerHTML = objPage.currPage + 1;
+         populateProductsList(objProduct.searchArr.slice(objPage.s, objPage.e + 1));
+         document.querySelector(".section-products").scrollTo({top: 0});
       };
    });
 };
 
 // Initialize the whole async part of the code
 const init = async function() {
-   // Fetching all products from an API call
-   const res = await fetch("products.json");
-   const data = await res.json();
-   // Creating global variables to hold filtered products
+   // Fetching all products from an AJAX call
+   const data = await getProducts();
+   // Creating global variables
    const productsObj = {
       products: data,
       filterArr: data,
       searchArr: data
+   };
+   const paginationObj = {
+      pageNum: Math.ceil(productsObj.products.length / 12),
+      currPage: 0,
+      s: 0,
+      e: 11
    };
    // Init products result badge value
    sectionProductsResultsValue.innerHTML = productsObj.products.length;
    // Getting all categories
    getCategories(productsObj.products);
    // Searchbar init
-   searchbarFilter(productsObj);
+   searchbarFilter(productsObj, paginationObj);
    // Filter init
-   filterSettings(productsObj);
+   filterSettings(productsObj, paginationObj);
    // Add to cart btn logic init
    addToCartListener(productsObj.products);
+   // Render products list
+   populateProductsList(productsObj.products.slice(paginationObj.s, paginationObj.e + 1));
+   // Pagination init
+   pagination(productsObj, paginationObj);
 };
 
 // Executing functions on window load event

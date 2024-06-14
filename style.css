@@ -613,3 +613,20 @@ hr{
    padding: 5px 10px;
    color: var(--custom-red);
 }
+
+/* Pagination */
+.section-products-pagination{
+   /* background-color: coral; */
+}
+
+.section-products-pagination-btn-box > button{
+   border: none;
+   background-color: var(--custom-black);
+   color: white;
+   padding: 6px;
+   font-size: 1.2em;
+}
+
+.current-page-value, .total-page-value{
+   font-weight: bold;
+}
