@@ -615,10 +615,6 @@ hr{
 }
 
 /* Pagination */
-.section-products-pagination{
-   /* background-color: coral; */
-}
-
 .section-products-pagination-btn-box > button{
    border: none;
    background-color: var(--custom-black);

@@ -34,6 +34,7 @@ const navbarCartBadge = document.querySelector(".navbar-cart-badge");
 const sectionProductsTitleCategory= document.querySelector(".section-products-title-category");
 const sectionProductsSearchbarInput = document.querySelector(".section-products-searchbar-input");
 const sectionProductsResultsValue = document.querySelector(".section-products-results-value");
+const sectionProductsPagination = document.querySelector(".section-products-pagination");
 const currentPageValue = document.querySelector(".current-page-value");
 const totalPageValue = document.querySelector(".total-page-value");
 
@@ -336,13 +337,8 @@ const searchbarFilter = function(obj, objPage) {
       // Update products result badge value
       sectionProductsResultsValue.innerHTML = filteredArr.length;
       obj.searchArr = filteredArr;
-      // Set pagination
-      objPage.pageNum = Math.ceil(obj.searchArr.length / 12);
-      objPage.currPage = 0;
-      objPage.s = 0;
-      obj.searchArr.length >= 12 ? (objPage.e = 11) : (objPage.e = obj.searchArr.length - 1);
-      currentPageValue.innerHTML = objPage.currPage + 1;
-      totalPageValue.innerHTML = objPage.pageNum;
+      // Update pagination
+      updatePagination(obj.searchArr, obj);
       // Populate products list
       populateProductsList(obj.searchArr.slice(objPage.s, objPage.e + 1));
    });
@@ -444,13 +440,8 @@ const filterSettings = function(obj, objPage) {
       sectionProductsResultsValue.innerHTML = filteredArr.length;
       obj.filterArr = filteredArr;
       obj.searchArr = obj.filterArr;
-      // Set pagination
-      objPage.pageNum = Math.ceil(obj.filterArr.length / 12);
-      objPage.currPage = 0;
-      objPage.s = 0;
-      obj.filterArr.length >= 12 ? (objPage.e = 11) : (objPage.e = obj.filterArr.length - 1);
-      currentPageValue.innerHTML = objPage.currPage + 1;
-      totalPageValue.innerHTML = objPage.pageNum;
+      // Update pagination
+      updatePagination(obj.filterArr, objPage);
       // Populate products list
       populateProductsList(obj.filterArr.slice(objPage.s, objPage.e + 1));
    });
@@ -478,13 +469,8 @@ const filterSettings = function(obj, objPage) {
       // Reset array filter
       obj.filterArr = obj.products.concat([]);
       obj.searchArr = obj.filterArr;
-      // Reset pagination
-      objPage.pageNum = Math.ceil(obj.filterArr.length / 12);
-      objPage.currPage = 0;
-      objPage.s = 0;
-      obj.filterArr.length >= 12 ? (objPage.e = 11) : (objPage.e = obj.filterArr.length - 1);
-      currentPageValue.innerHTML = objPage.currPage + 1;
-      totalPageValue.innerHTML = objPage.pageNum;
+      // Update pagination
+      updatePagination(obj.filterArr, objPage);
       // Populate products list
       populateProductsList(obj.products.slice(objPage.s, objPage.e + 1));
    });
@@ -522,6 +508,7 @@ const addToCartListener = function(arr) {
    });
 };
 
+// Pagination logic
 const pagination = function(objProduct, objPage) {
    const prevPage = document.querySelector(".section-products-pagination-btn-prev");
    const nextPage = document.querySelector(".section-products-pagination-btn-next");
@@ -557,6 +544,17 @@ const pagination = function(objProduct, objPage) {
          document.querySelector(".section-products").scrollTo({top: 0});
       };
    });
+};
+
+const updatePagination = function(arr, obj) {
+   sectionProductsPagination.classList.remove("d-none");
+   obj.pageNum = Math.ceil(arr.length / 12);
+   obj.currPage = 0;
+   obj.s = 0;
+   arr.length >= 12 ? (obj.e = 11) : (obj.e = arr.length - 1);
+   currentPageValue.innerHTML = obj.currPage + 1;
+   totalPageValue.innerHTML = obj.pageNum;
+   if(obj.pageNum <= 1) sectionProductsPagination.classList.add("d-none");
 };
 
 // Initialize the whole async part of the code
